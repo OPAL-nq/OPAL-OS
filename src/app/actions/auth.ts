@@ -32,6 +32,12 @@ export async function login(
     if (error.message.includes('Invalid login credentials')) {
       return { error: 'Identifiants invalides. Vérifiez votre email et mot de passe.' };
     }
+    if (error.message.includes('Email not confirmed')) {
+      return {
+        error:
+          "Votre adresse email n'a pas encore été confirmée. Veuillez vérifier votre boîte de réception (et vos spams) pour valider votre compte avant de vous connecter.",
+      };
+    }
     return { error: error.message };
   }
 
@@ -110,6 +116,7 @@ export async function signup(
       data: {
         full_name: fullName,
       },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_APP_URL || 'https://opal-os-gamma.vercel.app'}/api/auth/callback`,
     },
   });
 
@@ -126,6 +133,14 @@ export async function signup(
     } catch (syncErr) {
       console.warn('Background Whop sync warning on signup:', syncErr);
     }
+  }
+
+  // If email confirmation is required (session is null)
+  if (data?.user && !data.session) {
+    return {
+      success:
+        `Votre compte a été créé avec succès ! Un email de confirmation vient d'être envoyé à ${normalizedEmail}. Veuillez cliquer sur le lien reçu pour valider votre compte.`,
+    };
   }
 
   redirect('/dashboard');

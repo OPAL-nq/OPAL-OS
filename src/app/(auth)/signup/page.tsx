@@ -18,23 +18,42 @@ export default function SignupPage() {
         </p>
       </div>
 
-      {state?.error && (
-        <div className="mb-4 p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs space-y-2">
-          <p className="leading-relaxed">{state.error}</p>
-          {state.error.includes('Whop') && (
-            <div className="pt-1">
-              <a
-                href="https://whop.com"
-                target="_blank"
-                rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#39FF14] hover:underline"
-              >
-                Accéder aux offres OPAL sur Whop &rarr;
-              </a>
+      {state?.success ? (
+        <div className="p-6 rounded-2xl bg-[#141414] border border-[#39FF14]/30 text-center space-y-4 shadow-[0_0_30px_rgba(57,255,20,0.1)]">
+          <div className="w-12 h-12 rounded-full bg-[#39FF14]/10 border border-[#39FF14]/30 flex items-center justify-center mx-auto text-[#39FF14] text-xl">
+            ✉️
+          </div>
+          <div className="space-y-1.5">
+            <h2 className="text-base font-bold text-white">Vérifiez votre boîte mail</h2>
+            <p className="text-xs text-neutral-300 leading-relaxed">
+              {state.success}
+            </p>
+          </div>
+          <div className="pt-2">
+            <Button asChild className="w-full bg-[#39FF14] text-black font-semibold hover:bg-[#39FF14]/90 h-10">
+              <Link href="/login">Retourner à la connexion</Link>
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <>
+          {state?.error && (
+            <div className="mb-4 p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs space-y-2">
+              <p className="leading-relaxed">{state.error}</p>
+              {state.error.includes('Whop') && (
+                <div className="pt-1">
+                  <a
+                    href="https://whop.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#39FF14] hover:underline"
+                  >
+                    Accéder aux offres OPAL sur Whop &rarr;
+                  </a>
+                </div>
+              )}
             </div>
           )}
-        </div>
-      )}
 
       <form action={formAction} className="space-y-4">
         <div className="space-y-1.5">
@@ -111,6 +130,8 @@ export default function SignupPage() {
           Se connecter
         </Link>
       </div>
-    </div>
-  );
+    </>
+  )}
+</div>
+);
 }
