@@ -2,8 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 import { createServerClient } from "@supabase/ssr";
 
-// Routes that don't require authentication
-const publicRoutes = ["/login", "/signup", "/forgot-password"];
+// Auth routes — unauthenticated only (redirect to dashboard if already logged in)
+const authRoutes = ["/login", "/signup", "/forgot-password"];
+
+// Public routes — accessible by anyone without authentication
+const publicRoutes = ["/checkout"];
 
 // Routes that require admin role
 const adminRoutes = ["/admin"];
@@ -22,8 +25,15 @@ export async function proxy(request: NextRequest) {
   // 1. Refresh the Supabase session (token refresh)
   const { user, supabaseResponse } = await updateSession(request);
 
-  // 2. Public routes — allow access, redirect to dashboard if already logged in
-  if (publicRoutes.some((route) => pathname.startsWith(route))) {
+  // 2. Root route: redirect logged in users to dashboard, unauthenticated to checkout
+  if (pathname === "/") {
+    const url = request.nextUrl.clone();
+    url.pathname = user ? "/dashboard" : "/checkout";
+    return NextResponse.redirect(url);
+  }
+
+  // 3. Auth routes — allow access, redirect to dashboard if already logged in
+  if (authRoutes.some((route) => pathname.startsWith(route))) {
     if (user) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
@@ -32,12 +42,17 @@ export async function proxy(request: NextRequest) {
     return supabaseResponse;
   }
 
-  // 3. API routes — let them through (they handle their own auth)
+  // 4. Public routes (e.g. /checkout) — allow access for all visitors
+  if (publicRoutes.some((route) => pathname.startsWith(route))) {
+    return supabaseResponse;
+  }
+
+  // 5. API routes — let them through (they handle their own auth)
   if (pathname.startsWith("/api/")) {
     return supabaseResponse;
   }
 
-  // 4. Protected routes — redirect to login if not authenticated
+  // 6. Protected routes — redirect to login if not authenticated
   if (!user) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
