@@ -46,27 +46,35 @@ export async function proxy(request: NextRequest) {
   }
 
   // 5. Fetch user profile for role/plan checks
-  // We create a lightweight server client to query the profile
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        getAll() {
-          return request.cookies.getAll();
-        },
-        setAll() {
-          // Not needed for read-only operations in proxy
-        },
-      },
-    }
-  );
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role, plan, status")
-    .eq("id", user.id)
-    .single();
+  let profile: any = null;
+  if (supabaseUrl && supabaseAnonKey) {
+    try {
+      const supabase = createServerClient(
+        supabaseUrl,
+        supabaseAnonKey,
+        {
+          cookies: {
+            getAll() {
+              return request.cookies.getAll();
+            },
+            setAll() {},
+          },
+        }
+      );
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("role, plan, status")
+        .eq("id", user.id)
+        .single();
+      profile = data;
+    } catch {
+      profile = null;
+    }
+  }
 
   // 6. Admin route protection
   if (adminRoutes.some((route) => pathname.startsWith(route))) {
