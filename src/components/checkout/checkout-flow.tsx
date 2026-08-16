@@ -510,11 +510,11 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                   href={directWhopUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="w-full h-14 rounded-xl font-black text-sm bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_25px_rgba(57,255,20,0.3)] flex items-center justify-center gap-2.5 transition-all group active:scale-95"
+                  className="w-full min-h-[3.5rem] py-3 px-4 rounded-xl font-black text-xs sm:text-sm bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_25px_rgba(57,255,20,0.3)] flex items-center justify-center gap-2 text-center transition-all group active:scale-95 leading-tight"
                 >
-                  <CreditCard className="w-5 h-5 text-black" />
+                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-black shrink-0" />
                   <span>Procéder au paiement sur Whop (CB / Apple Pay)</span>
-                  <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                  <ExternalLink className="w-4 h-4 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                 </a>
 
                 <p className="text-center text-[11px] text-neutral-400">

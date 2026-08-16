@@ -85,7 +85,7 @@ export function ChannelSidebar({ channels, activeSlug, isAdmin }: ChannelSidebar
   };
 
   return (
-    <aside className="w-56 sm:w-60 lg:w-64 bg-[#0E0E0E] border-r border-white/5 flex flex-col justify-between shrink-0 select-none h-full overflow-hidden">
+    <aside className="hidden md:flex w-56 sm:w-60 lg:w-64 bg-[#0E0E0E] border-r border-white/5 flex-col justify-between shrink-0 select-none h-full overflow-hidden">
       {/* Community Server Header */}
       <div className="h-14 px-4 border-b border-white/5 flex items-center justify-between shrink-0 bg-[#111111]/40">
         <div className="flex items-center gap-2.5 min-w-0">

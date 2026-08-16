@@ -56,45 +56,47 @@ export function TradingHubTabs({ sessions, trades, stats }: TradingHubTabsProps)
 
       {/* Tab Navigation Pill Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
-        <div className="flex items-center gap-2 bg-black/60 p-1 rounded-xl border border-white/10">
-          <button
-            type="button"
-            onClick={() => setActiveTab('sessions')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              activeTab === 'sessions'
-                ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <Compass className="w-4 h-4" />
-            <span>Sessions & Préparation ({sessions.length})</span>
-          </button>
+        <div className="w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
+          <div className="inline-flex items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-white/10 shrink-0 min-w-full sm:min-w-0">
+            <button
+              type="button"
+              onClick={() => setActiveTab('sessions')}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                activeTab === 'sessions'
+                  ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Compass className="w-4 h-4 shrink-0" />
+              <span>Sessions ({sessions.length})</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('journal')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              activeTab === 'journal'
-                ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Journal — Mes Trades ({trades.length})</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('journal')}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                activeTab === 'journal'
+                  ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <BookOpen className="w-4 h-4 shrink-0" />
+              <span>Journal ({trades.length})</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => setActiveTab('stats')}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all ${
-              activeTab === 'stats'
-                ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
-                : 'text-neutral-400 hover:text-white'
-            }`}
-          >
-            <BarChart3 className="w-4 h-4" />
-            <span>Statistiques ({stats.winRate.toFixed(0)}% WR)</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('stats')}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                activeTab === 'stats'
+                  ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <BarChart3 className="w-4 h-4 shrink-0" />
+              <span>Statistiques ({stats.winRate.toFixed(0)}%)</span>
+            </button>
+          </div>
         </div>
 
         {/* Action Button depending on tab */}

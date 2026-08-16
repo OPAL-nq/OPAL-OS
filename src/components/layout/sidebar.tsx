@@ -92,7 +92,7 @@ export function Sidebar({ profile }: SidebarProps) {
   return (
     <aside
       className={cn(
-        'h-screen bg-[#0A0A0A] border-r border-white/5 flex flex-col shrink-0 select-none transition-all duration-300 ease-in-out relative z-30',
+        'hidden md:flex h-screen bg-[#0A0A0A] border-r border-white/5 flex-col shrink-0 select-none transition-all duration-300 ease-in-out relative z-30',
         isCollapsed ? 'w-[72px]' : 'w-64'
       )}
     >
