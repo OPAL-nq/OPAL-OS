@@ -10,11 +10,10 @@ export const WHOP_PRODUCTS = {
 
 /**
  * Official Whop Plan IDs / Checkout IDs for OPAL OS (Used by Embedded & Direct Checkout)
- * Can be overridden via environment variables if updated in Whop dashboard.
  */
 export const WHOP_PLANS = {
-  ACADEMY: process.env.NEXT_PUBLIC_WHOP_PLAN_ACADEMY || 'plan_oVyKtV2XqBdJF',
-  INTENSIVE: process.env.NEXT_PUBLIC_WHOP_PLAN_INTENSIVE || 'plan_rWw750hUkKQMm',
+  ACADEMY: process.env.NEXT_PUBLIC_WHOP_PLAN_ACADEMY || 'plan_1yIWMd3tSKNT9',
+  INTENSIVE: process.env.NEXT_PUBLIC_WHOP_PLAN_INTENSIVE || 'plan_dMe42h1VOTBSh',
 } as const;
 
 export interface WhopProductMapping {

@@ -3,7 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { syncUserWhopMembership } from '@/lib/whop/sync';
-import { WHOP_PRODUCTS, resolvePlanFromWhopProduct } from '@/lib/whop/constants';
+import { WHOP_PRODUCTS, WHOP_PLANS, resolvePlanFromWhopProduct } from '@/lib/whop/constants';
 import type { UserPlan } from '@/types';
 
 export interface VerifyPaymentResult {
@@ -150,6 +150,7 @@ export async function completeCheckoutRegistration(formData: {
   const hasIntensive = memberships.some(
     (m) =>
       m.whop_product_id === WHOP_PRODUCTS.INTENSIVE ||
+      m.whop_product_id === WHOP_PLANS.INTENSIVE ||
       m.plan_type === 'intensive'
   );
   const targetPlan: UserPlan = hasIntensive ? 'intensive' : 'community';
