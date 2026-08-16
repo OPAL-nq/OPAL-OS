@@ -4,3 +4,5 @@ export * from './trading';
 export * from './community';
 export * from './intensive';
 export * from './whop';
+export * from './direct-messages';
+

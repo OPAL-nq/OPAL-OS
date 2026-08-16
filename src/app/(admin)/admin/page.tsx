@@ -1,7 +1,7 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Shield, Users, GraduationCap, Radio, Flame } from 'lucide-react';
+import { Shield, Users, GraduationCap, Radio, Flame, MessageSquareMore } from 'lucide-react';
 import Link from 'next/link';
 import type { Profile } from '@/types';
 
@@ -94,7 +94,39 @@ export default async function AdminDashboardPage() {
         <h2 className="text-sm font-bold uppercase tracking-wider text-neutral-400">
           Modules d'Administration OPAL
         </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link href="/admin/messages" className="group">
+            <Card className="bg-[#141414] border-white/5 group-hover:border-[#39FF14]/40 transition-all p-5 h-full flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-9 h-9 rounded-xl bg-[#39FF14]/10 border border-[#39FF14]/20 flex items-center justify-center text-[#39FF14]">
+                  <MessageSquareMore className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-white group-hover:text-[#39FF14] transition-colors text-sm">
+                  Messagerie & Support Privé
+                </h3>
+                <p className="text-xs text-neutral-400">
+                  Boîte de réception des messages privés et coaching direct One-on-One.
+                </p>
+              </div>
+            </Card>
+          </Link>
+
+          <Link href="/admin/students" className="group">
+            <Card className="bg-[#141414] border-white/5 group-hover:border-[#39FF14]/40 transition-all p-5 h-full flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="w-9 h-9 rounded-xl bg-[#39FF14]/10 border border-[#39FF14]/20 flex items-center justify-center text-[#39FF14]">
+                  <Users className="w-5 h-5" />
+                </div>
+                <h3 className="font-bold text-white group-hover:text-[#39FF14] transition-colors text-sm">
+                  Suivi Élèves & Trades
+                </h3>
+                <p className="text-xs text-neutral-400">
+                  Inspection des journals de trading, sessions et statistiques.
+                </p>
+              </div>
+            </Card>
+          </Link>
+
           <Link href="/admin/academy" className="group">
             <Card className="bg-[#141414] border-white/5 group-hover:border-[#39FF14]/40 transition-all p-5 h-full flex flex-col justify-between">
               <div className="space-y-2">
@@ -143,17 +175,17 @@ export default async function AdminDashboardPage() {
             </Card>
           </Link>
 
-          <Link href="/admin/students" className="group">
+          <Link href="/admin/intensive" className="group">
             <Card className="bg-[#141414] border-white/5 group-hover:border-[#39FF14]/40 transition-all p-5 h-full flex flex-col justify-between">
               <div className="space-y-2">
                 <div className="w-9 h-9 rounded-xl bg-[#39FF14]/10 border border-[#39FF14]/20 flex items-center justify-center text-[#39FF14]">
-                  <Users className="w-5 h-5" />
+                  <Flame className="w-5 h-5" />
                 </div>
                 <h3 className="font-bold text-white group-hover:text-[#39FF14] transition-colors text-sm">
-                  Suivi Élèves & Trades
+                  Admin Intensive
                 </h3>
                 <p className="text-xs text-neutral-400">
-                  Inspection des journals de trading, sessions et statistiques.
+                  Gestion des élèves One-on-One, séances, comptes-rendus et roadmaps.
                 </p>
               </div>
             </Card>

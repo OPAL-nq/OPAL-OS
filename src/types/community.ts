@@ -35,7 +35,7 @@ export interface AppNotification {
   title: string;
   message: string;
   link?: string | null;
-  type: 'announcement' | 'support' | 'live' | 'system';
+  type: 'announcement' | 'support' | 'live' | 'system' | 'message';
   read: boolean;
   created_at: string;
 }

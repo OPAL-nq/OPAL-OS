@@ -47,9 +47,15 @@ export function SidebarItem({
             </span>
           )}
 
-          {/* Pro badge dot */}
+          {/* Numeric or Text badge in collapsed mode */}
           {badge && !isLocked && (
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#39FF14] shadow-[0_0_6px_#39FF14]" />
+            /^\d+$/.test(badge) ? (
+              <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] rounded-full bg-[#39FF14] text-black text-[10px] font-black flex items-center justify-center px-1 shadow-[0_0_8px_rgba(57,255,20,0.6)] animate-pulse">
+                {badge}
+              </span>
+            ) : (
+              <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#39FF14] shadow-[0_0_6px_#39FF14]" />
+            )
           )}
         </Link>
 
@@ -57,7 +63,12 @@ export function SidebarItem({
         <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 hidden group-hover:flex items-center gap-2 px-3 py-1.5 bg-[#181818] border border-white/10 text-xs font-semibold text-white rounded-lg shadow-2xl z-50 whitespace-nowrap pointer-events-none animate-in fade-in duration-100">
           <span>{label}</span>
           {badge && (
-            <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase bg-[#39FF14]/20 text-[#39FF14]">
+            <span className={cn(
+              "px-1.5 py-0.2 rounded text-[9px] font-black uppercase",
+              /^\d+$/.test(badge)
+                ? "bg-[#39FF14] text-black font-black"
+                : "bg-[#39FF14]/20 text-[#39FF14]"
+            )}>
               {badge}
             </span>
           )}
@@ -70,6 +81,8 @@ export function SidebarItem({
       </div>
     );
   }
+
+  const isNumericBadge = badge && /^\d+$/.test(badge);
 
   return (
     <Link
@@ -93,9 +106,15 @@ export function SidebarItem({
 
       <div className="flex items-center gap-1.5 shrink-0">
         {badge && (
-          <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#39FF14]/10 text-[#39FF14] border border-[#39FF14]/20">
-            {badge}
-          </span>
+          isNumericBadge ? (
+            <span className="min-w-[20px] h-[20px] px-1.5 rounded-full bg-[#39FF14] text-black text-[10px] font-black flex items-center justify-center shadow-[0_0_8px_rgba(57,255,20,0.4)]">
+              {badge}
+            </span>
+          ) : (
+            <span className="px-1.5 py-0.5 text-[10px] font-bold rounded bg-[#39FF14]/10 text-[#39FF14] border border-[#39FF14]/20">
+              {badge}
+            </span>
+          )
         )}
         {isLocked && (
           <Lock className="w-3.5 h-3.5 text-neutral-500 group-hover:text-neutral-400" />

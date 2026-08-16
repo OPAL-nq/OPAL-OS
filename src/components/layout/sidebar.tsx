@@ -8,6 +8,7 @@ import {
   TrendingUp,
   Cpu,
   MessageSquare,
+  MessageSquareMore,
   Radio,
   Flame,
   ShieldCheck,
@@ -21,6 +22,8 @@ import {
 import { SidebarItem } from './sidebar-item';
 import type { Profile } from '@/types';
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
+import { getUnreadDirectMessagesCount } from '@/app/actions/direct-messages';
 
 interface SidebarProps {
   profile: Profile | null;
@@ -29,15 +32,44 @@ interface SidebarProps {
 export function Sidebar({ profile }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
 
-  // Sync with localStorage on client mount
+  // Sync with localStorage on client mount & load unread messages
   useEffect(() => {
     setIsMounted(true);
     const saved = localStorage.getItem('opal_sidebar_collapsed');
     if (saved !== null) {
       setIsCollapsed(saved === 'true');
     }
-  }, []);
+
+    if (profile?.id) {
+      getUnreadDirectMessagesCount()
+        .then((count) => setUnreadMessagesCount(count))
+        .catch(() => {});
+
+      const supabase = createClient();
+      const channel = supabase
+        .channel('sidebar-direct-messages')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'direct_messages',
+          },
+          () => {
+            getUnreadDirectMessagesCount()
+              .then((count) => setUnreadMessagesCount(count))
+              .catch(() => {});
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [profile?.id]);
 
   const toggleCollapse = () => {
     setIsCollapsed((prev) => {
@@ -149,6 +181,13 @@ export function Sidebar({ profile }: SidebarProps) {
               isCollapsed={isCollapsed}
             />
             <SidebarItem
+              href="/messages"
+              icon={MessageSquareMore}
+              label="Messages"
+              badge={unreadMessagesCount > 0 ? String(unreadMessagesCount) : undefined}
+              isCollapsed={isCollapsed}
+            />
+            <SidebarItem
               href="/live"
               icon={Radio}
               label="Live"
@@ -202,6 +241,13 @@ export function Sidebar({ profile }: SidebarProps) {
                 href="/admin/students"
                 icon={TrendingUp}
                 label="Suivi Élèves & Trades"
+                isCollapsed={isCollapsed}
+              />
+              <SidebarItem
+                href="/admin/messages"
+                icon={MessageSquareMore}
+                label="Messagerie Membres"
+                badge={unreadMessagesCount > 0 ? String(unreadMessagesCount) : undefined}
                 isCollapsed={isCollapsed}
               />
               <SidebarItem
