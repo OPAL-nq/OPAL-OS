@@ -126,10 +126,29 @@ function SignupForm() {
         </Button>
       </form>
 
-      <div className="mt-6 text-center text-xs text-neutral-400">
-        Déjà un compte ?{' '}
-        <Link href="/login" className="text-[#39FF14] hover:underline font-medium">
-          Se connecter
+      <div className="mt-6 space-y-3 text-center text-xs">
+        <div className="text-neutral-400">
+          Déjà un compte ?{' '}
+          <Link href="/login" className="text-[#39FF14] hover:underline font-semibold">
+            Se connecter
+          </Link>
+        </div>
+
+        <div className="relative py-2 flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center">
+            <div className="w-full border-t border-white/10" />
+          </div>
+          <span className="relative px-3 bg-[#141414] text-[10px] uppercase tracking-wider text-neutral-500 font-semibold">
+            ou
+          </span>
+        </div>
+
+        <Link
+          href="/checkout"
+          className="w-full h-10 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-200 hover:text-[#39FF14] border border-white/10 hover:border-[#39FF14]/30 font-semibold flex items-center justify-center gap-2 transition-all group"
+        >
+          <span>Découvrir nos offres & Rejoindre OPAL</span>
+          <span className="text-[#39FF14] group-hover:translate-x-0.5 transition-transform">&rarr;</span>
         </Link>
       </div>
     </>

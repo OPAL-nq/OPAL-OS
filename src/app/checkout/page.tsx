@@ -8,7 +8,7 @@ export const metadata = {
 };
 
 interface CheckoutPageProps {
-  searchParams: Promise<{
+  searchParams?: Promise<{
     offer?: string;
     product?: string;
     status?: string;
@@ -17,8 +17,8 @@ interface CheckoutPageProps {
 }
 
 export default async function CheckoutPage({ searchParams }: CheckoutPageProps) {
-  const params = await searchParams;
-  const rawOffer = (params.offer || params.plan || params.product || '').toLowerCase();
+  const resolvedParams = searchParams ? await searchParams : {};
+  const rawOffer = (resolvedParams?.offer || resolvedParams?.plan || resolvedParams?.product || '').toLowerCase();
 
   const initialOffer: 'academy' | 'intensive' =
     rawOffer === 'intensive' || rawOffer === 'pro'
