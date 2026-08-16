@@ -42,15 +42,30 @@ export async function processWhopWebhook(event: WhopWebhookEvent): Promise<Proce
 
   // Determine if this event grants active access or revokes it
   const isDeactivation = [
+    'membership_deactivated',
     'membership.went_invalid',
     'membership.cancelled',
     'membership.deleted',
     'membership.terminated',
     'payment.failed',
+    'invoice_past_due',
+    'invoice_voided',
+    'invoice_marked_uncollectible',
+    'entry_denied',
+    'entry_deleted',
+  ].includes(action);
+
+  const isExplicitActivation = [
+    'membership_activated',
+    'membership.went_valid',
+    'membership.created',
+    'invoice_paid',
+    'payment.succeeded',
+    'entry_approved',
   ].includes(action);
 
   const rawStatus = data.status || (isDeactivation ? 'inactive' : 'active');
-  const isGrantingAccess = !isDeactivation && isMembershipStatusActive(rawStatus, data.valid);
+  const isGrantingAccess = isExplicitActivation || (!isDeactivation && isMembershipStatusActive(rawStatus, data.valid));
 
   // Format dates
   const rawCreatedAt = data.created_at || data.renewal_period_start;
