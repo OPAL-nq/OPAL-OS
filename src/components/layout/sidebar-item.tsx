@@ -31,6 +31,7 @@ export function SidebarItem({
       <div className="relative group flex justify-center py-0.5">
         <Link
           href={href}
+          title={label}
           className={cn(
             'w-11 h-11 flex items-center justify-center rounded-xl transition-all duration-150 relative',
             isActive

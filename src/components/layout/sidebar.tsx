@@ -96,49 +96,57 @@ export function Sidebar({ profile }: SidebarProps) {
         isCollapsed ? 'w-[72px]' : 'w-64'
       )}
     >
-      {/* Brand Header & Toggle */}
+      {/* Brand Header & Toggle (Always visible & interactive) */}
       <div
         className={cn(
-          'h-16 flex items-center border-b border-white/5 shrink-0 transition-all',
-          isCollapsed ? 'px-3 justify-center' : 'px-5 justify-between'
+          'h-16 flex items-center border-b border-white/5 shrink-0 transition-all px-3.5',
+          isCollapsed ? 'justify-center' : 'justify-between px-4'
         )}
       >
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2.5 min-w-0 group"
-          title="OPAL Trading OS"
-        >
-          <div className="w-8 h-8 rounded-lg bg-[#141414] border border-[#39FF14]/30 flex items-center justify-center shrink-0 group-hover:border-[#39FF14] transition-colors">
-            <div className="w-2.5 h-2.5 rounded-full bg-[#39FF14] shadow-[0_0_10px_#39FF14]" />
-          </div>
-
-          {!isCollapsed && (
-            <div className="flex flex-col min-w-0 animate-in fade-in duration-200">
-              <span className="text-base font-bold tracking-wider text-white leading-none">
-                OPAL
-              </span>
-              <span className="text-[10px] uppercase tracking-widest text-neutral-400 leading-tight mt-0.5">
-                Trading OS
-              </span>
-            </div>
-          )}
-        </Link>
-
-        {/* Header Toggle Button */}
-        {!isCollapsed && (
+        {isCollapsed ? (
           <button
             type="button"
             onClick={toggleCollapse}
-            className="p-1.5 rounded-lg text-neutral-500 hover:text-white hover:bg-white/5 transition-colors"
-            title="Réduire la barre latérale"
+            className="w-10 h-10 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] border border-[#39FF14]/30 hover:border-[#39FF14] flex items-center justify-center transition-all group shadow-sm"
+            title="Agrandir la barre latérale"
           >
-            <PanelLeftClose className="w-4 h-4" />
+            <div className="w-3 h-3 rounded-full bg-[#39FF14] shadow-[0_0_10px_#39FF14] group-hover:scale-110 transition-transform" />
           </button>
+        ) : (
+          <>
+            <Link
+              href="/dashboard"
+              className="flex items-center gap-2.5 min-w-0 group"
+              title="OPAL Trading OS"
+            >
+              <div className="w-8 h-8 rounded-lg bg-[#141414] border border-[#39FF14]/30 flex items-center justify-center shrink-0 group-hover:border-[#39FF14] transition-colors">
+                <div className="w-2.5 h-2.5 rounded-full bg-[#39FF14] shadow-[0_0_10px_#39FF14]" />
+              </div>
+
+              <div className="flex flex-col min-w-0">
+                <span className="text-base font-bold tracking-wider text-white leading-none">
+                  OPAL
+                </span>
+                <span className="text-[10px] uppercase tracking-widest text-neutral-400 leading-tight mt-0.5">
+                  Trading OS
+                </span>
+              </div>
+            </Link>
+
+            <button
+              type="button"
+              onClick={toggleCollapse}
+              className="p-2 rounded-xl text-neutral-400 hover:text-white bg-white/[0.03] hover:bg-white/10 border border-white/5 transition-colors"
+              title="Réduire la barre latérale"
+            >
+              <PanelLeftClose className="w-4 h-4" />
+            </button>
+          </>
         )}
       </div>
 
-      {/* Navigation Sections */}
-      <div className={cn("flex-1 px-2.5 py-4 space-y-5", isCollapsed ? "overflow-visible" : "overflow-y-auto scrollbar-thin scrollbar-thumb-white/5")}>
+      {/* Navigation Sections (Fully Scrollable in both collapsed & expanded states) */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-none px-2.5 py-4 space-y-5">
         {/* 1. Main Menu */}
         <div>
           {!isCollapsed ? (
@@ -279,25 +287,38 @@ export function Sidebar({ profile }: SidebarProps) {
         )}
       </div>
 
-      {/* Collapse / Expand footer toggle (When collapsed) */}
-      {isCollapsed && (
-        <div className="p-2 border-t border-white/5 flex justify-center shrink-0">
-          <button
-            type="button"
-            onClick={toggleCollapse}
-            className="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white flex items-center justify-center transition-colors shadow-sm"
-            title="Agrandir la barre latérale"
-          >
-            <PanelLeftOpen className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+      {/* Collapse / Expand footer button (Always available) */}
+      <div className="p-2 border-t border-white/5 flex justify-center shrink-0 bg-[#0D0D0D]/50">
+        <button
+          type="button"
+          onClick={toggleCollapse}
+          className={cn(
+            'rounded-xl text-neutral-400 hover:text-white bg-white/[0.03] hover:bg-white/10 border border-white/5 flex items-center justify-center transition-colors shadow-sm',
+            isCollapsed ? 'w-10 h-10' : 'w-full h-9 gap-2 text-xs font-semibold px-3'
+          )}
+          title={isCollapsed ? 'Agrandir la barre latérale' : 'Réduire la barre latérale'}
+        >
+          {isCollapsed ? (
+            <PanelLeftOpen className="w-4 h-4 text-[#39FF14]" />
+          ) : (
+            <>
+              <PanelLeftClose className="w-4 h-4 text-neutral-400" />
+              <span>Réduire le menu</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* User Profile Footer */}
       <div className="p-3 border-t border-white/5 bg-[#0D0D0D] shrink-0">
         {isCollapsed ? (
           <div className="relative group flex justify-center py-1">
-            <div className="relative">
+            <button
+              type="button"
+              onClick={toggleCollapse}
+              className="relative cursor-pointer focus:outline-none"
+              title="Agrandir la barre latérale"
+            >
               {profile?.avatar_url ? (
                 <img
                   src={profile.avatar_url}
@@ -317,17 +338,7 @@ export function Sidebar({ profile }: SidebarProps) {
                 </div>
               )}
               <span className="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#39FF14] ring-2 ring-[#0A0A0A]" />
-            </div>
-
-            {/* Hover tooltip for user info */}
-            <div className="absolute left-full ml-3 top-1/2 -translate-y-1/2 hidden group-hover:flex flex-col px-3 py-2 bg-[#181818] border border-white/10 rounded-xl shadow-2xl z-50 whitespace-nowrap pointer-events-none animate-in fade-in duration-100 min-w-[140px]">
-              <span className="text-xs font-bold text-white truncate max-w-[160px]">
-                {authorName}
-              </span>
-              <span className="text-[10px] text-neutral-400 capitalize">
-                Plan {profile?.plan || 'Community'} {isAdmin ? '• Admin' : ''}
-              </span>
-            </div>
+            </button>
           </div>
         ) : (
           <div className="flex items-center justify-between gap-2">
