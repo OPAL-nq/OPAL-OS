@@ -21,7 +21,7 @@ import {
   User as UserIcon,
   KeyRound,
 } from 'lucide-react';
-import { WHOP_PRODUCTS } from '@/lib/whop/constants';
+import { WHOP_PRODUCTS, WHOP_PLANS } from '@/lib/whop/constants';
 import {
   verifyWhopPaymentStatus,
   completeCheckoutRegistration,
@@ -59,12 +59,20 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
     'select' | 'checkout' | 'verifying' | 'confirmed'
   >('select');
 
-  // Selected product
-  const [selectedProductId, setSelectedProductId] = useState<string>(
-    initialOffer === 'intensive'
-      ? WHOP_PRODUCTS.INTENSIVE
-      : WHOP_PRODUCTS.ACADEMY
+  // Selected offer
+  const [selectedOffer, setSelectedOffer] = useState<'academy' | 'intensive'>(
+    initialOffer === 'intensive' ? 'intensive' : 'academy'
   );
+
+  const selectedPlanId =
+    selectedOffer === 'intensive'
+      ? WHOP_PLANS.INTENSIVE
+      : WHOP_PLANS.ACADEMY;
+
+  const selectedProductId =
+    selectedOffer === 'intensive'
+      ? WHOP_PRODUCTS.INTENSIVE
+      : WHOP_PRODUCTS.ACADEMY;
 
   // Buyer & verification state
   const [capturedEmail, setCapturedEmail] = useState<string>('');
@@ -90,13 +98,13 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
     }
   }, [capturedEmail, accountEmail]);
 
-  const handleProceedToCheckout = (productId: string) => {
-    setSelectedProductId(productId);
+  const handleProceedToCheckout = (offer: 'academy' | 'intensive') => {
+    setSelectedOffer(offer);
     setCurrentStep('checkout');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const directWhopUrl = `https://whop.com/checkout/${selectedProductId}`;
+  const directWhopUrl = `https://whop.com/checkout/${selectedPlanId}`;
 
   // Triggered when Whop payment completes inside embed
   const handleWhopComplete = async (
@@ -355,9 +363,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                 <div className="pt-8 mt-auto">
                   <button
                     type="button"
-                    onClick={() =>
-                      handleProceedToCheckout(WHOP_PRODUCTS.ACADEMY)
-                    }
+                    onClick={() => handleProceedToCheckout('academy')}
                     className="w-full h-12 rounded-xl font-bold text-sm bg-white/10 hover:bg-white/15 text-white hover:text-[#39FF14] border border-white/10 transition-all flex items-center justify-center gap-2 group"
                   >
                     <span>Choisir OPAL Academy</span>
@@ -370,7 +376,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               <div
                 className={cn(
                   'rounded-2xl bg-[#141414] border transition-all duration-200 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden',
-                  selectedProductId === WHOP_PRODUCTS.INTENSIVE
+                  selectedOffer === 'intensive'
                     ? 'border-[#39FF14] shadow-[0_0_35px_rgba(57,255,20,0.18)] ring-2 ring-[#39FF14]/50 bg-gradient-to-b from-[#141414] to-[#121a12]'
                     : 'border-white/10 hover:border-[#39FF14]/50'
                 )}
@@ -439,9 +445,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                 <div className="pt-8 mt-auto">
                   <button
                     type="button"
-                    onClick={() =>
-                      handleProceedToCheckout(WHOP_PRODUCTS.INTENSIVE)
-                    }
+                    onClick={() => handleProceedToCheckout('intensive')}
                     className="w-full h-12 rounded-xl font-black text-sm bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_20px_rgba(57,255,20,0.3)] transition-all flex items-center justify-center gap-2 group"
                   >
                     <span>Choisir OPAL Intensive</span>
@@ -483,7 +487,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               <div className="flex items-center gap-2">
                 <span className="text-xs text-neutral-400">Offre choisie :</span>
                 <span className="text-xs font-bold text-[#39FF14]">
-                  {selectedProductId === WHOP_PRODUCTS.INTENSIVE
+                  {selectedOffer === 'intensive'
                     ? 'OPAL Intensive (1 998 €)'
                     : 'OPAL Academy (59 €/mois)'}
                 </span>
@@ -522,7 +526,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               <div className="pt-2 border-t border-white/5 space-y-3">
                 <div className="w-full min-h-[360px] rounded-xl overflow-hidden bg-black/40 border border-white/5">
                   <WhopCheckoutEmbed
-                    planId={selectedProductId}
+                    planId={selectedPlanId}
                     theme="dark"
                     themeOptions={{
                       backgroundColor: '#141414',

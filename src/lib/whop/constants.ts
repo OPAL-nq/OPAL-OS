@@ -1,11 +1,20 @@
 import { UserPlan } from '@/types';
 
 /**
- * Official Whop Product IDs for OPAL OS
+ * Official Whop Product IDs for OPAL OS (Used by Webhooks & Database sync)
  */
 export const WHOP_PRODUCTS = {
   ACADEMY: 'prod_oVyKtV2XqBdJF',
   INTENSIVE: 'prod_rWw750hUkKQMm',
+} as const;
+
+/**
+ * Official Whop Plan IDs / Checkout IDs for OPAL OS (Used by Embedded & Direct Checkout)
+ * Can be overridden via environment variables if updated in Whop dashboard.
+ */
+export const WHOP_PLANS = {
+  ACADEMY: process.env.NEXT_PUBLIC_WHOP_PLAN_ACADEMY || 'plan_oVyKtV2XqBdJF',
+  INTENSIVE: process.env.NEXT_PUBLIC_WHOP_PLAN_INTENSIVE || 'plan_rWw750hUkKQMm',
 } as const;
 
 export interface WhopProductMapping {
@@ -31,12 +40,18 @@ export const WHOP_PRODUCT_MAP: Record<string, WhopProductMapping> = {
 };
 
 /**
- * Helper to resolve the OPAL plan corresponding to a Whop product ID
+ * Helper to resolve the OPAL plan corresponding to a Whop product or plan ID
  */
-export function resolvePlanFromWhopProduct(productId?: string | null): UserPlan {
-  if (!productId) return 'community';
-  const mapped = WHOP_PRODUCT_MAP[productId];
-  return mapped ? mapped.plan : 'community';
+export function resolvePlanFromWhopProduct(id?: string | null): UserPlan {
+  if (!id) return 'community';
+  if (
+    id === WHOP_PRODUCTS.INTENSIVE ||
+    id === WHOP_PLANS.INTENSIVE ||
+    id.toLowerCase().includes('intensive')
+  ) {
+    return 'intensive';
+  }
+  return 'community';
 }
 
 /**
