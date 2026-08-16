@@ -3,9 +3,10 @@ import crypto from 'crypto';
 /**
  * Verifies Whop webhook signature.
  * 
- * Supports both:
+ * Supports:
  * 1. Standard HMAC-SHA256 signatures (`whop-signature` or `x-whop-signature`)
  * 2. Svix/Standard Webhook signatures (`webhook-signature`, `webhook-id`, `webhook-timestamp`)
+ * 3. Secret keys with prefixes `ws_...`, `whsec_...` or raw strings.
  */
 export function verifyWhopWebhookSignature(
   rawBody: string,
@@ -27,54 +28,81 @@ export function verifyWhopWebhookSignature(
   const svixId = headers.get('webhook-id');
   const svixTimestamp = headers.get('webhook-timestamp');
 
-  // Case 1: Standard HMAC header
+  // Case 1: Standard HMAC header (whop-signature / x-whop-signature)
   if (whopSignature) {
-    const expectedSignature = crypto
+    const expectedSignatureHex = crypto
       .createHmac('sha256', secret)
       .update(rawBody)
       .digest('hex');
 
     const cleanSignature = whopSignature.replace(/^sha256=/, '');
-    const isMatch = crypto.timingSafeEqual(
-      Buffer.from(cleanSignature, 'utf-8'),
-      Buffer.from(expectedSignature, 'utf-8')
-    );
+    try {
+      if (
+        cleanSignature.length === expectedSignatureHex.length &&
+        crypto.timingSafeEqual(
+          Buffer.from(cleanSignature, 'utf-8'),
+          Buffer.from(expectedSignatureHex, 'utf-8')
+        )
+      ) {
+        return { isValid: true };
+      }
+    } catch {
+      // ignore
+    }
 
-    return isMatch
-      ? { isValid: true }
-      : { isValid: false, reason: 'HMAC signature mismatch' };
+    return { isValid: false, reason: 'HMAC signature mismatch' };
   }
 
-  // Case 2: Svix format (v1,signature)
+  // Case 2: Svix / Standard Webhooks (webhook-signature + webhook-id + webhook-timestamp)
   if (svixSignature && svixId && svixTimestamp) {
     const signedPayload = `${svixId}.${svixTimestamp}.${rawBody}`;
-    const cleanSecret = secret.startsWith('whsec_') ? secret.substring(6) : secret;
-    const secretBuffer = Buffer.from(cleanSecret, 'base64');
+    
+    // Whop secrets can be "whsec_...", "ws_..." or raw strings
+    let secretKey = secret;
+    if (secret.startsWith('whsec_')) {
+      secretKey = secret.substring(6);
+    } else if (secret.startsWith('ws_')) {
+      secretKey = secret.substring(3);
+    }
 
-    const expectedSignature = crypto
-      .createHmac('sha256', secretBuffer)
-      .update(signedPayload)
-      .digest('base64');
+    // Try verifying with base64 decoded key first (Svix standard), then fallback to utf-8
+    const candidateKeys: Buffer[] = [];
+    try {
+      candidateKeys.push(Buffer.from(secretKey, 'base64'));
+    } catch {
+      // ignore
+    }
+    candidateKeys.push(Buffer.from(secret, 'utf-8'));
+    candidateKeys.push(Buffer.from(secretKey, 'utf-8'));
 
-    // svixSignature can contain multiple comma-separated signatures (e.g. "v1,signature1 v1,signature2")
     const passedSignatures = svixSignature
       .split(' ')
       .map((s) => s.split(',')[1] || s);
 
-    const isMatch = passedSignatures.some((sig) => {
-      try {
-        return crypto.timingSafeEqual(
-          Buffer.from(sig, 'utf-8'),
-          Buffer.from(expectedSignature, 'utf-8')
-        );
-      } catch {
-        return false;
-      }
-    });
+    for (const key of candidateKeys) {
+      const expectedBase64 = crypto
+        .createHmac('sha256', key)
+        .update(signedPayload)
+        .digest('base64');
 
-    return isMatch
-      ? { isValid: true }
-      : { isValid: false, reason: 'Svix signature mismatch' };
+      for (const sig of passedSignatures) {
+        try {
+          if (
+            sig.length === expectedBase64.length &&
+            crypto.timingSafeEqual(
+              Buffer.from(sig, 'utf-8'),
+              Buffer.from(expectedBase64, 'utf-8')
+            )
+          ) {
+            return { isValid: true };
+          }
+        } catch {
+          // continue
+        }
+      }
+    }
+
+    return { isValid: false, reason: 'Svix webhook signature mismatch' };
   }
 
   // If secret is set but no matching signature header was found
