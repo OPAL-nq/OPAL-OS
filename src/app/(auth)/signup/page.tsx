@@ -19,8 +19,20 @@ export default function SignupPage() {
       </div>
 
       {state?.error && (
-        <div className="mb-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
-          {state.error}
+        <div className="mb-4 p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs space-y-2">
+          <p className="leading-relaxed">{state.error}</p>
+          {state.error.includes('Whop') && (
+            <div className="pt-1">
+              <a
+                href="https://whop.com"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#39FF14] hover:underline"
+              >
+                Accéder aux offres OPAL sur Whop &rarr;
+              </a>
+            </div>
+          )}
         </div>
       )}
 

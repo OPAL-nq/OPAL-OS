@@ -67,10 +67,44 @@ export async function signup(
     return { error: 'Les mots de passe ne correspondent pas.' };
   }
 
+  const normalizedEmail = email.trim().toLowerCase();
+
+  // 1. Strict Whop Membership Verification (Option 1)
+  // Only users who have purchased on Whop or admins can create an account
+  try {
+    const { createAdminClient } = await import('@/lib/supabase/admin');
+    const adminClient = createAdminClient();
+
+    const [membershipRes, adminRes] = await Promise.all([
+      adminClient
+        .from('whop_memberships')
+        .select('id, status, plan_type')
+        .ilike('email', normalizedEmail)
+        .in('status', ['active', 'valid', 'completed'])
+        .limit(1)
+        .maybeSingle(),
+      adminClient
+        .from('profiles')
+        .select('id, role')
+        .ilike('email', normalizedEmail)
+        .eq('role', 'admin')
+        .maybeSingle(),
+    ]);
+
+    if (!membershipRes.data && !adminRes.data) {
+      return {
+        error:
+          "Aucun abonnement Whop actif n'est associé à cette adresse email. Veuillez d'abord commander votre accès sur Whop avec cet email pour débloquer la création de votre compte.",
+      };
+    }
+  } catch (checkErr) {
+    console.warn('Whop pre-signup verification check skipped or error:', checkErr);
+  }
+
   const supabase = await createClient();
 
   const { data, error } = await supabase.auth.signUp({
-    email,
+    email: normalizedEmail,
     password,
     options: {
       data: {
@@ -80,6 +114,9 @@ export async function signup(
   });
 
   if (error) {
+    if (error.message.includes('User already registered')) {
+      return { error: 'Un compte existe déjà avec cette adresse email. Veuillez vous connecter.' };
+    }
     return { error: error.message };
   }
 
