@@ -49,7 +49,11 @@ async function resolveAdminId(supabase: any): Promise<string> {
     .limit(1);
 
   if (error || !admins || admins.length === 0) {
-    throw new Error("Aucun compte administrateur n'est actuellement configuré.");
+    const { data: anyProfile } = await supabase
+      .from('profiles')
+      .select('id')
+      .limit(1);
+    return anyProfile?.[0]?.id || '';
   }
 
   return admins[0].id;
@@ -83,10 +87,27 @@ export async function sendDirectMessage({
     // Regular member: MUST send to an admin (cannot send to other members)
     targetReceiverId = await resolveAdminId(supabase);
   } else {
-    // Admin sending: MUST have a receiverId
+    // Admin sending:
+    // If receiverId is provided, use it. If not provided (admin testing /messages),
+    // default to another admin or fallback to self.
     if (!targetReceiverId) {
-      throw new Error('Veuillez spécifier le membre destinataire.');
+      const { data: otherAdmins } = await supabase
+        .from('profiles')
+        .select('id')
+        .eq('role', 'admin')
+        .neq('id', user.id)
+        .limit(1);
+
+      if (otherAdmins && otherAdmins.length > 0) {
+        targetReceiverId = otherAdmins[0].id;
+      } else {
+        targetReceiverId = user.id;
+      }
     }
+  }
+
+  if (!targetReceiverId) {
+    targetReceiverId = user.id;
   }
 
   // Insert message into direct_messages
@@ -118,11 +139,12 @@ export async function sendDirectMessage({
   // Create in-app notification
   try {
     if (!isAdmin) {
-      // Member sent message -> Notify all admins
+      // Member sent message -> Notify all other admins
       const { data: adminProfiles } = await supabase
         .from('profiles')
         .select('id')
-        .eq('role', 'admin');
+        .eq('role', 'admin')
+        .neq('id', user.id);
 
       if (adminProfiles && adminProfiles.length > 0) {
         const notifs = adminProfiles.map((a: { id: string }) => ({
@@ -135,8 +157,8 @@ export async function sendDirectMessage({
         }));
         await supabase.from('notifications').insert(notifs);
       }
-    } else {
-      // Admin sent reply -> Notify member
+    } else if (targetReceiverId && targetReceiverId !== user.id) {
+      // Admin sent reply -> Notify member (if not self)
       await supabase.from('notifications').insert({
         user_id: targetReceiverId,
         title: "💬 Nouveau message de l'équipe OPAL",
