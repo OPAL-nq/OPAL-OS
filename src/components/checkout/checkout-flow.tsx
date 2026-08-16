@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -15,34 +15,30 @@ import {
   Sparkles,
   Loader2,
   AlertCircle,
-  TrendingUp,
-  Radio,
-  Cpu,
-  Users,
-  MessageSquare,
-  FileText,
-  Target,
-  KeyRound,
+  ExternalLink,
+  CreditCard,
   Mail,
   User as UserIcon,
+  KeyRound,
 } from 'lucide-react';
-import { WHOP_PRODUCTS, WHOP_PRODUCT_MAP } from '@/lib/whop/constants';
+import { WHOP_PRODUCTS } from '@/lib/whop/constants';
 import {
   verifyWhopPaymentStatus,
-  checkEmailRegistered,
   completeCheckoutRegistration,
 } from '@/app/actions/checkout';
 import { cn } from '@/lib/utils';
 
-// Dynamically import WhopCheckoutEmbed to ensure clean SSR hydration
+// Dynamically import WhopCheckoutEmbed for SSR compatibility
 const WhopCheckoutEmbed = dynamic(
   () =>
-    import('@whop/checkout/react').then((mod) => mod.WhopCheckoutEmbed),
+    import('@whop/checkout/react')
+      .then((mod) => mod.WhopCheckoutEmbed)
+      .catch(() => () => null),
   {
     ssr: false,
     loading: () => (
-      <div className="h-96 flex flex-col items-center justify-center space-y-4 bg-[#141414] rounded-2xl border border-white/10 p-8 text-neutral-400">
-        <Loader2 className="w-8 h-8 animate-spin text-[#39FF14]" />
+      <div className="h-64 flex flex-col items-center justify-center space-y-3 bg-[#141414] rounded-2xl border border-white/10 p-6 text-neutral-400">
+        <Loader2 className="w-6 h-6 animate-spin text-[#39FF14]" />
         <p className="text-xs font-mono uppercase tracking-wider">
           Chargement du terminal de paiement sécurisé Whop...
         </p>
@@ -58,28 +54,28 @@ interface CheckoutFlowProps {
 export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
   const router = useRouter();
 
-  // 1. State: Step management
-  // 'select' | 'checkout' | 'verifying' | 'confirmed'
+  // Step state: 'select' | 'checkout' | 'verifying' | 'confirmed'
   const [currentStep, setCurrentStep] = useState<
     'select' | 'checkout' | 'verifying' | 'confirmed'
   >('select');
 
-  // 2. State: Selected product
+  // Selected product
   const [selectedProductId, setSelectedProductId] = useState<string>(
     initialOffer === 'intensive'
       ? WHOP_PRODUCTS.INTENSIVE
       : WHOP_PRODUCTS.ACADEMY
   );
 
-  // 3. State: Payment & Buyer Info
+  // Buyer & verification state
   const [capturedEmail, setCapturedEmail] = useState<string>('');
   const [verifiedPlan, setVerifiedPlan] = useState<'community' | 'intensive'>(
     initialOffer === 'intensive' ? 'intensive' : 'community'
   );
   const [isExistingAccount, setIsExistingAccount] = useState<boolean>(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [isPollingVerification, setIsPollingVerification] = useState<boolean>(false);
 
-  // 4. State: Account Creation Form
+  // Account creation form state
   const [fullName, setFullName] = useState<string>('');
   const [accountEmail, setAccountEmail] = useState<string>('');
   const [password, setPassword] = useState<string>('');
@@ -87,19 +83,20 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
   const [isSubmittingSignup, setIsSubmittingSignup] = useState<boolean>(false);
   const [signupError, setSignupError] = useState<string | null>(null);
 
-  // Auto-fill accountEmail when capturedEmail updates
+  // Keep accountEmail in sync with capturedEmail
   useEffect(() => {
     if (capturedEmail && !accountEmail) {
       setAccountEmail(capturedEmail);
     }
   }, [capturedEmail, accountEmail]);
 
-  // Handle offer continuation
   const handleProceedToCheckout = (productId: string) => {
     setSelectedProductId(productId);
     setCurrentStep('checkout');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+
+  const directWhopUrl = `https://whop.com/checkout/${selectedProductId}`;
 
   // Triggered when Whop payment completes inside embed
   const handleWhopComplete = async (
@@ -110,7 +107,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
     setCurrentStep('verifying');
     setVerificationError(null);
 
-    // Extract email if available in result
     const payerEmail =
       result?.email ||
       result?.user_email ||
@@ -122,7 +118,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
       setAccountEmail(payerEmail);
     }
 
-    // Verify on server side against whop_memberships (polling 5 attempts max)
+    // Verify on server side against whop_memberships table
     let verified = false;
     let attempts = 0;
 
@@ -144,54 +140,49 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
       } catch (err) {
         console.warn('Polling check error:', err);
       }
-      // Wait 1.5 seconds between attempts for webhook delivery
       await new Promise((r) => setTimeout(r, 1500));
     }
 
-    if (verified) {
-      setCurrentStep('confirmed');
-    } else {
-      // Fallback: Transition to confirmed and ask user to confirm their payment email
-      setVerifiedPlan(
-        selectedProductId === WHOP_PRODUCTS.INTENSIVE
-          ? 'intensive'
-          : 'community'
-      );
-      setCurrentStep('confirmed');
-    }
+    setVerifiedPlan(
+      selectedProductId === WHOP_PRODUCTS.INTENSIVE ? 'intensive' : 'community'
+    );
+    setCurrentStep('confirmed');
   };
 
-  // Manual payment verification trigger (if email was entered after payment)
-  const handleManualVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!accountEmail) return;
+  // Manual payment verification check
+  const handleManualVerify = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!accountEmail.trim()) {
+      setVerificationError('Veuillez renseigner votre adresse email.');
+      return;
+    }
 
-    setCurrentStep('verifying');
+    setIsPollingVerification(true);
     setVerificationError(null);
 
     try {
       const check = await verifyWhopPaymentStatus(
-        accountEmail,
+        accountEmail.trim(),
         selectedProductId
       );
       if (check.verified) {
         if (check.plan) setVerifiedPlan(check.plan);
         setIsExistingAccount(!!check.isExistingUser);
-        setCapturedEmail(accountEmail);
+        setCapturedEmail(accountEmail.trim());
         setCurrentStep('confirmed');
       } else {
         setVerificationError(
-          "Paiement en cours de synchronisation. Si vous venez de payer, attendez quelques secondes puis réessayez."
+          "Paiement non trouvé pour cet email. Si vous venez de payer, attendez quelques secondes puis cliquez à nouveau sur Vérifier."
         );
-        setCurrentStep('confirmed');
       }
     } catch (err: any) {
-      setVerificationError(err?.message || "Erreur de vérification.");
-      setCurrentStep('confirmed');
+      setVerificationError(err?.message || "Erreur lors de la vérification.");
+    } finally {
+      setIsPollingVerification(false);
     }
   };
 
-  // Handle final signup submission
+  // Final signup submission
   const handleSignupSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSignupError(null);
@@ -230,7 +221,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
         return;
       }
 
-      // Success -> Redirect to dashboard
       router.push('/dashboard');
     } catch (err: any) {
       setSignupError(
@@ -242,10 +232,10 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
 
   return (
     <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col justify-between selection:bg-[#39FF14] selection:text-black">
-      {/* Top Navigation Bar */}
+      {/* Top Header Navigation */}
       <header className="border-b border-white/5 bg-[#0D0D0D]/80 backdrop-blur-md sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <Link href="/dashboard" className="flex items-center gap-2.5 group">
+          <Link href="/checkout" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-lg bg-[#141414] border border-[#39FF14]/30 flex items-center justify-center shrink-0 group-hover:border-[#39FF14] transition-colors">
               <div className="w-2.5 h-2.5 rounded-full bg-[#39FF14] shadow-[0_0_10px_#39FF14]" />
             </div>
@@ -273,14 +263,13 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
         </div>
       </header>
 
-      {/* Main Content Area */}
+      {/* Main Container */}
       <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* ================================================================= */}
         {/* STEP 1: OFFER SELECTION                                           */}
         {/* ================================================================= */}
         {currentStep === 'select' && (
           <div className="space-y-10 animate-in fade-in duration-300">
-            {/* Header */}
             <div className="text-center max-w-2xl mx-auto space-y-3">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#39FF14]/10 border border-[#39FF14]/30 text-[#39FF14] text-xs font-bold uppercase tracking-wider">
                 <Sparkles className="w-3.5 h-3.5" />
@@ -295,9 +284,8 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               </p>
             </div>
 
-            {/* Pricing Cards Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto items-stretch">
-              {/* CARD 1: OPAL ACADEMY */}
+              {/* CARD 1: ACADEMY */}
               <div
                 className={cn(
                   'rounded-2xl bg-[#141414] border transition-all duration-200 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden',
@@ -307,7 +295,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                 )}
               >
                 <div className="space-y-6">
-                  {/* Top Badge & Title */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
                       <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
@@ -323,7 +310,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     </div>
                   </div>
 
-                  {/* Price */}
                   <div className="pt-2 pb-4 border-b border-white/5">
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl sm:text-5xl font-black text-white">
@@ -338,7 +324,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     </p>
                   </div>
 
-                  {/* Features List */}
                   <div className="space-y-3 text-xs">
                     <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
                       Inclus dans l'accès Academy :
@@ -348,9 +333,9 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                         'Dashboard de trading & cockpit OPAL OS',
                         'Academy complète : modules, chapitres & vidéos',
                         'Trading Workspace & gestionnaire de sessions',
-                        'Trading Journal d’exécution & calcul automatique de PnL',
+                        'Trading Journal d’exécution & calcul de PnL',
                         'OPAL Systems & stratégies systématiques NQ',
-                        'Live Sessions hebdomadaires & interactions en direct',
+                        'Live Sessions hebdomadaires & interactions',
                         'Replays vidéo illimités disponibles 24/7',
                         'Community de traders & salons d’échanges',
                         'Messagerie privée avec le support OPAL',
@@ -367,7 +352,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                   </div>
                 </div>
 
-                {/* CTA Button */}
                 <div className="pt-8 mt-auto">
                   <button
                     type="button"
@@ -382,7 +366,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                 </div>
               </div>
 
-              {/* CARD 2: OPAL INTENSIVE (Premium Highlighted) */}
+              {/* CARD 2: INTENSIVE */}
               <div
                 className={cn(
                   'rounded-2xl bg-[#141414] border transition-all duration-200 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden',
@@ -391,13 +375,11 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     : 'border-white/10 hover:border-[#39FF14]/50'
                 )}
               >
-                {/* Elite Top Banner */}
                 <div className="absolute top-0 right-0 bg-[#39FF14] text-black text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-bl-xl shadow-lg">
                   Accompagnement 1-on-1
                 </div>
 
                 <div className="space-y-6">
-                  {/* Top Badge & Title */}
                   <div className="flex items-start justify-between gap-4">
                     <div className="space-y-1">
                       <div className="w-10 h-10 rounded-xl bg-[#39FF14]/15 border border-[#39FF14]/30 flex items-center justify-center text-[#39FF14]">
@@ -416,7 +398,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     </div>
                   </div>
 
-                  {/* Price */}
                   <div className="pt-2 pb-4 border-b border-white/5">
                     <div className="flex items-baseline gap-1">
                       <span className="text-4xl sm:text-5xl font-black text-[#39FF14]">
@@ -428,7 +409,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     </p>
                   </div>
 
-                  {/* Features List */}
                   <div className="space-y-3 text-xs">
                     <p className="text-[11px] font-bold text-[#39FF14] uppercase tracking-wider">
                       Tous les accès Academy PLUS :
@@ -438,11 +418,11 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                         'Tous les accès complets OPAL Academy inclus',
                         'Cockpit dédié OPAL Intensive déverrouillé',
                         '2 sessions de coaching privé 1-on-1 par semaine',
-                        'Audit complet de vos sessions de trading & psychologie',
-                        'Suivi personnalisé et validation d’objectifs de compte',
-                        'Comptes rendus détaillés après chaque séance de mentorat',
+                        'Audit complet de vos sessions de trading',
+                        'Suivi personnalisé et validation d’objectifs',
+                        'Comptes rendus détaillés après chaque séance',
                         'Canal de messagerie privée prioritaire avec vos mentors',
-                        'Roadmap individualisée vers la rentabilité et le prop firm',
+                        'Roadmap individualisée vers la rentabilité',
                       ].map((item, idx) => (
                         <li
                           key={idx}
@@ -456,7 +436,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                   </div>
                 </div>
 
-                {/* CTA Button */}
                 <div className="pt-8 mt-auto">
                   <button
                     type="button"
@@ -472,7 +451,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               </div>
             </div>
 
-            {/* Bottom Trust Badge */}
             <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-neutral-500 pt-4">
               <div className="flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-[#39FF14]" />
@@ -487,11 +465,11 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
         )}
 
         {/* ================================================================= */}
-        {/* STEP 2: EMBEDDED WHOP CHECKOUT                                    */}
+        {/* STEP 2: HYBRID CHECKOUT (EMBED + DIRECT WHOP TERMINAL)            */}
         {/* ================================================================= */}
         {currentStep === 'checkout' && (
           <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
-            {/* Header with Back Button */}
+            {/* Top Bar */}
             <div className="flex items-center justify-between pb-2 border-b border-white/5">
               <button
                 type="button"
@@ -503,7 +481,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               </button>
 
               <div className="flex items-center gap-2">
-                <span className="text-xs text-neutral-400">Offre sélectionnée :</span>
+                <span className="text-xs text-neutral-400">Offre choisie :</span>
                 <span className="text-xs font-bold text-[#39FF14]">
                   {selectedProductId === WHOP_PRODUCTS.INTENSIVE
                     ? 'OPAL Intensive (1 998 €)'
@@ -512,42 +490,99 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               </div>
             </div>
 
-            {/* Embedded Whop Checkout Container */}
-            <div className="bg-[#141414] border border-white/10 rounded-2xl p-4 sm:p-6 shadow-2xl space-y-4">
-              <div className="flex items-center justify-between text-xs pb-3 border-b border-white/5">
+            {/* Main Checkout Box */}
+            <div className="bg-[#141414] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
+              <div className="flex items-center justify-between text-xs pb-4 border-b border-white/5">
                 <div className="flex items-center gap-2 text-white font-bold">
                   <Lock className="w-4 h-4 text-[#39FF14]" />
-                  <span>Paiement 100% sécurisé propulsé par Whop</span>
+                  <span>Paiement sécurisé propulsé par Whop</span>
                 </div>
                 <span className="text-neutral-500 text-[10px]">Chiffrement 256-bit</span>
               </div>
 
-              {/* Official Whop React Checkout Embed */}
-              <div className="w-full min-h-[420px] rounded-xl overflow-hidden">
-                <WhopCheckoutEmbed
-                  planId={selectedProductId}
-                  theme="dark"
-                  themeOptions={{
-                    backgroundColor: '#141414',
-                    accentColor: '#39FF14',
-                  }}
-                  skipRedirect={true}
-                  onIdentityCaptured={(data) => {
-                    if (data?.email) {
-                      setCapturedEmail(data.email);
-                      setAccountEmail(data.email);
-                    }
-                  }}
-                  onComplete={handleWhopComplete}
-                  onPaymentError={(err) => {
-                    console.warn('Payment error from Whop embed:', err);
-                  }}
-                />
+              {/* Direct 1-Click Payment Button */}
+              <div className="space-y-3">
+                <a
+                  href={directWhopUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full h-14 rounded-xl font-black text-sm bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_25px_rgba(57,255,20,0.3)] flex items-center justify-center gap-2.5 transition-all group active:scale-95"
+                >
+                  <CreditCard className="w-5 h-5 text-black" />
+                  <span>Procéder au paiement sur Whop (CB / Apple Pay)</span>
+                  <ExternalLink className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                </a>
+
+                <p className="text-center text-[11px] text-neutral-400">
+                  Le paiement s'ouvre dans une fenêtre sécurisée Whop pour une compatibilité maximale.
+                </p>
               </div>
 
-              {/* Security info */}
-              <div className="pt-2 text-center text-[11px] text-neutral-500">
-                Vos informations de paiement sont traitées exclusivement par Whop. Aucune donnée bancaire n'est stockée sur OPAL OS.
+              {/* Embedded Whop Checkout View */}
+              <div className="pt-2 border-t border-white/5 space-y-3">
+                <div className="w-full min-h-[360px] rounded-xl overflow-hidden bg-black/40 border border-white/5">
+                  <WhopCheckoutEmbed
+                    planId={selectedProductId}
+                    theme="dark"
+                    themeOptions={{
+                      backgroundColor: '#141414',
+                      accentColor: '#39FF14',
+                    }}
+                    skipRedirect={true}
+                    onIdentityCaptured={(data) => {
+                      if (data?.email) {
+                        setCapturedEmail(data.email);
+                        setAccountEmail(data.email);
+                      }
+                    }}
+                    onComplete={handleWhopComplete}
+                  />
+                </div>
+              </div>
+
+              {/* Instant Verification after payment */}
+              <div className="p-4 rounded-xl bg-black/60 border border-white/10 space-y-3">
+                <div className="space-y-1">
+                  <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-[#39FF14]" />
+                    <span>Tu as finalisé ton paiement ?</span>
+                  </h4>
+                  <p className="text-[11px] text-neutral-400">
+                    Saisis l'adresse email utilisée lors du paiement pour débloquer immédiatement ton compte OPAL.
+                  </p>
+                </div>
+
+                <div className="flex gap-2">
+                  <input
+                    type="email"
+                    placeholder="trader@exemple.com"
+                    value={accountEmail}
+                    onChange={(e) => setAccountEmail(e.target.value)}
+                    className="flex-1 px-3.5 py-2 bg-[#141414] border border-white/10 rounded-lg text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#39FF14]"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => handleManualVerify()}
+                    disabled={isPollingVerification}
+                    className="px-4 py-2 bg-[#39FF14] hover:bg-[#32e612] text-black font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                  >
+                    {isPollingVerification ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <>
+                        <span>Vérifier</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                {verificationError && (
+                  <p className="text-[11px] text-yellow-400 flex items-center gap-1.5 pt-1">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{verificationError}</span>
+                  </p>
+                )}
               </div>
             </div>
           </div>
@@ -577,7 +612,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
         {/* ================================================================= */}
         {currentStep === 'confirmed' && (
           <div className="max-w-lg mx-auto space-y-6 animate-in fade-in duration-300">
-            {/* Top Success Badge */}
             <div className="p-6 rounded-2xl bg-[#141414] border border-[#39FF14]/40 text-center space-y-3 shadow-[0_0_30px_rgba(57,255,20,0.1)]">
               <div className="w-12 h-12 rounded-full bg-[#39FF14] text-black flex items-center justify-center mx-auto font-black shadow-[0_0_15px_#39FF14]">
                 <Check className="w-6 h-6 stroke-[3]" />
@@ -596,15 +630,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               </p>
             </div>
 
-            {/* Error banner if any */}
-            {verificationError && (
-              <div className="p-3.5 bg-yellow-500/10 border border-yellow-500/30 rounded-xl text-yellow-400 text-xs flex items-start gap-2.5">
-                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
-                <span>{verificationError}</span>
-              </div>
-            )}
-
-            {/* CASE A: EXISTING OPAL ACCOUNT */}
+            {/* CASE A: EXISTING USER */}
             {isExistingAccount ? (
               <div className="p-6 rounded-2xl bg-[#141414] border border-white/10 space-y-5">
                 <div className="space-y-1.5">
@@ -612,7 +638,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     Un compte OPAL existe déjà avec cette adresse email
                   </h3>
                   <p className="text-xs text-neutral-400 leading-relaxed">
-                    Votre nouvel accès a été automatiquement associé à votre compte ({accountEmail}). Connectez-vous simplement pour accéder immédiatement à votre nouvel espace.
+                    Votre nouvel accès a été automatiquement associé à votre compte ({accountEmail}). Connectez-vous simplement pour accéder à votre cockpit.
                   </p>
                 </div>
 
@@ -625,14 +651,14 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                 </Link>
               </div>
             ) : (
-              /* CASE B: NEW OPAL ACCOUNT CREATION */
+              /* CASE B: NEW USER SIGNUP */
               <div className="p-6 sm:p-8 rounded-2xl bg-[#141414] border border-white/10 space-y-6">
                 <div className="space-y-1">
                   <h3 className="text-lg font-bold text-white">
                     Crée ton compte OPAL
                   </h3>
                   <p className="text-xs text-neutral-400">
-                    Finalise la configuration de tes identifiants pour accéder au Dashboard.
+                    Configure tes identifiants pour finaliser ton inscription.
                   </p>
                 </div>
 
@@ -644,7 +670,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                 )}
 
                 <form onSubmit={handleSignupSubmit} className="space-y-4">
-                  {/* Full Name */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-neutral-300">
                       Prénom & Nom
@@ -662,10 +687,9 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     </div>
                   </div>
 
-                  {/* Email */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-neutral-300">
-                      Adresse Email (utilisée lors du paiement)
+                      Adresse Email de paiement
                     </label>
                     <div className="relative">
                       <Mail className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-500" />
@@ -680,7 +704,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     </div>
                   </div>
 
-                  {/* Password */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-neutral-300">
                       Mot de passe
@@ -698,7 +721,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     </div>
                   </div>
 
-                  {/* Confirm Password */}
                   <div className="space-y-1.5">
                     <label className="text-xs font-semibold text-neutral-300">
                       Confirmer le mot de passe
@@ -716,7 +738,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     </div>
                   </div>
 
-                  {/* Submit Button */}
                   <button
                     type="submit"
                     disabled={isSubmittingSignup}
@@ -743,7 +764,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
         )}
       </main>
 
-      {/* Footer */}
       <footer className="border-t border-white/5 py-6 text-center text-xs text-neutral-500">
         <p>© 2026 OPAL OS — Tous droits réservés.</p>
       </footer>
