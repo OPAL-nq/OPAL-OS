@@ -1,12 +1,15 @@
 'use client';
 
-import React, { useActionState } from 'react';
+import React, { useActionState, Suspense } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { signup } from '@/app/actions/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
-export default function SignupPage() {
+function SignupForm() {
+  const searchParams = useSearchParams();
+  const defaultEmail = searchParams.get('email') || '';
   const [state, formAction, isPending] = useActionState(signup, undefined);
 
   return (
@@ -78,6 +81,7 @@ export default function SignupPage() {
             id="email"
             name="email"
             type="email"
+            defaultValue={defaultEmail}
             placeholder="trader@opal.app"
             required
             autoComplete="email"
@@ -134,4 +138,12 @@ export default function SignupPage() {
   )}
 </div>
 );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="text-center text-neutral-500 py-10">Chargement...</div>}>
+      <SignupForm />
+    </Suspense>
+  );
 }
