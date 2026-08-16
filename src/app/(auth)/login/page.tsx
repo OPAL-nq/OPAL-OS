@@ -77,11 +77,19 @@ function LoginFormContent() {
         </Button>
       </form>
 
-      <div className="mt-6 text-center text-xs text-neutral-400">
-        Pas encore de compte ?{' '}
-        <Link href="/signup" className="text-[#39FF14] hover:underline font-medium">
-          Créer un compte
-        </Link>
+      <div className="mt-6 text-center text-xs text-neutral-400 space-y-1">
+        <div>
+          Pas encore de compte ?{' '}
+          <Link href="/signup" className="text-[#39FF14] hover:underline font-medium">
+            Créer un compte
+          </Link>
+        </div>
+        <div>
+          Pas encore abonné ?{' '}
+          <Link href="/checkout" className="text-neutral-400 hover:text-white underline">
+            Découvrir nos offres & Rejoindre OPAL
+          </Link>
+        </div>
       </div>
     </div>
   );

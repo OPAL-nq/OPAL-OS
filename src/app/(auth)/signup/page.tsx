@@ -44,16 +44,14 @@ function SignupForm() {
             <div className="mb-4 p-3.5 rounded-xl bg-red-500/10 border border-red-500/25 text-red-400 text-xs space-y-2">
               <p className="leading-relaxed">{state.error}</p>
               {state.error.includes('Whop') && (
-                <div className="pt-1">
-                  <a
-                    href="https://whop.com"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#39FF14] hover:underline"
-                  >
-                    Accéder aux offres OPAL sur Whop &rarr;
-                  </a>
-                </div>
+                  <div className="pt-1">
+                    <Link
+                      href="/checkout"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#39FF14] hover:underline"
+                    >
+                      Découvrir les offres et commander mon accès sur le Checkout OPAL &rarr;
+                    </Link>
+                  </div>
               )}
             </div>
           )}
