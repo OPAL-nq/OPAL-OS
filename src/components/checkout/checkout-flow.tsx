@@ -18,13 +18,13 @@ import {
   Mail,
   User as UserIcon,
   KeyRound,
-  GraduationCap,
-  TrendingUp,
-  Radio,
-  Cpu,
-  MessageSquare,
   Award,
   Zap,
+  Target,
+  Calendar,
+  Layers,
+  HelpCircle,
+  CheckCircle2,
 } from 'lucide-react';
 import { WHOP_PRODUCTS, WHOP_PLANS } from '@/lib/whop/constants';
 import {
@@ -270,9 +270,9 @@ export function CheckoutFlow() {
 
             {/* 2-Column Grid Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
-              {/* LEFT COLUMN: INTENSIVE VALUE STACK & DETAILS (7 COLS) */}
+              {/* LEFT COLUMN: INTENSIVE VALUE STACK, PHASES & FAQ (7 COLS) */}
               <div className="lg:col-span-7 space-y-6">
-                {/* Main Card */}
+                {/* 1. Main Offer Card */}
                 <div className="rounded-2xl bg-[#141414] border border-[#39FF14]/40 p-6 sm:p-8 relative overflow-hidden shadow-[0_0_35px_rgba(57,255,20,0.12)] bg-gradient-to-b from-[#141414] via-[#141414] to-[#121c12]">
                   <div className="absolute top-0 right-0 bg-[#39FF14] text-black text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-bl-xl shadow-lg">
                     Offre Exclusive
@@ -306,7 +306,7 @@ export function CheckoutFlow() {
                             1 998 €
                           </span>
                           <span className="text-xs font-semibold text-neutral-400">
-                            Paiement unique • Accès complet à vie
+                            Paiement unique • Accès complet & Suivi continu
                           </span>
                         </div>
                       </div>
@@ -364,8 +364,113 @@ export function CheckoutFlow() {
                   </div>
                 </div>
 
-                {/* Trust and Guarantee Badges */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                {/* 2. Process / Roadmap Steps */}
+                <div className="p-6 rounded-2xl bg-[#141414] border border-white/10 space-y-4">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white">
+                    <Layers className="w-4 h-4 text-[#39FF14]" />
+                    <span>Déroulement & Méthode d'Accompagnement</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                    <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-[#39FF14]/20 text-[#39FF14] text-[10px] font-black flex items-center justify-center">
+                          01
+                        </span>
+                        <h4 className="text-xs font-bold text-white">Audit & Cadrage</h4>
+                      </div>
+                      <p className="text-[11px] text-neutral-400 leading-relaxed">
+                        Analyse de vos blocages, de vos métriques et configuration sur-mesure de votre espace.
+                      </p>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-[#39FF14]/20 text-[#39FF14] text-[10px] font-black flex items-center justify-center">
+                          02
+                        </span>
+                        <h4 className="text-xs font-bold text-white">Ruleset & Exécution</h4>
+                      </div>
+                      <p className="text-[11px] text-neutral-400 leading-relaxed">
+                        Intégration stricte des stratégies NQ/ES, gestion du risque et élimination du FOMO.
+                      </p>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-[#39FF14]/20 text-[#39FF14] text-[10px] font-black flex items-center justify-center">
+                          03
+                        </span>
+                        <h4 className="text-xs font-bold text-white">Suivi 1-on-1</h4>
+                      </div>
+                      <p className="text-[11px] text-neutral-400 leading-relaxed">
+                        2 calls privés par semaine, débriefings vidéo continus et montée en charge sur capitaux.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 3. Who is this for? */}
+                <div className="p-6 rounded-2xl bg-[#141414] border border-white/10 space-y-4">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white">
+                    <Target className="w-4 h-4 text-[#39FF14]" />
+                    <span>À qui s’adresse OPAL Intensive ?</span>
+                  </div>
+
+                  <div className="space-y-2.5 text-xs text-neutral-300">
+                    <div className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-[#39FF14] shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Traders en quête de rentabilité régulière :</strong> pour ceux qui veulent passer du trading aléatoire à une discipline institutionnelle rigoureuse.
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-[#39FF14] shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Candidats aux comptes financés (Prop Firms) :</strong> validation et maintien des drawdowns stricts sur les marchés Futures CME.
+                      </span>
+                    </div>
+                    <div className="flex items-start gap-2.5">
+                      <CheckCircle2 className="w-4 h-4 text-[#39FF14] shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Ceux qui veulent un mentor dédié :</strong> un suivi direct sans filtre avec Maxym pour corriger chaque trade en temps réel.
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 4. Quick FAQ */}
+                <div className="p-6 rounded-2xl bg-[#141414] border border-white/10 space-y-4">
+                  <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-white">
+                    <HelpCircle className="w-4 h-4 text-[#39FF14]" />
+                    <span>Questions Fréquentes</span>
+                  </div>
+
+                  <div className="space-y-3 text-xs">
+                    <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
+                      <h4 className="font-bold text-white flex items-center gap-2">
+                        <Calendar className="w-3.5 h-3.5 text-[#39FF14]" />
+                        <span>Comment se planifient les séances 1-on-1 ?</span>
+                      </h4>
+                      <p className="text-[11px] text-neutral-400 leading-relaxed">
+                        Dès votre inscription, vous accédez au module de réservation dans votre cockpit pour planifier vos 2 séances hebdomadaires selon votre emploi du temps.
+                      </p>
+                    </div>
+
+                    <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-1.5">
+                      <h4 className="font-bold text-white flex items-center gap-2">
+                        <Lock className="w-3.5 h-3.5 text-[#39FF14]" />
+                        <span>Que se passe-t-il après le paiement ?</span>
+                      </h4>
+                      <p className="text-[11px] text-neutral-400 leading-relaxed">
+                        L'activation est instantanée : vous configurez vos identifiants ci-contre et accédez immédiatement au Cockpit Intensive et à l'Academy complète.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 5. Trust and Guarantee Badges */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                   <div className="p-3.5 rounded-xl bg-[#141414] border border-white/5 flex items-center gap-3">
                     <ShieldCheck className="w-5 h-5 text-[#39FF14] shrink-0" />
                     <div className="text-[11px]">
