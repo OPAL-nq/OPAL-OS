@@ -66,43 +66,21 @@ avant la sophistication.
 
 3. Offre OPAL
 
-OPAL Intensive
+OPAL Intensive (Offre Unique)
 
 Prix : 1 998 € (Paiement unique / Accompagnement sur-mesure)
 
-Offre d'élite avec accompagnement 1-on-1 personnalisé.
+Offre d'élite avec accompagnement 1-on-1 personnalisé. C'est l'unique offre disponible pour accéder à la plateforme.
 
 Elle donne accès à :
 
 * Tout l'écosystème OPAL OS (Academy, Trading, Systems, Community, Live)
 * 2 coachings privés 1-on-1 par semaine avec Maxym
-* Espace et Cockpit personnel OPAL Intensive déverrouillé (objectifs, feuilles de route, comptes-rendus)
+* Espace et Cockpit personnel déverrouillé (objectifs, feuilles de route, comptes-rendus)
 * Audit continu des sessions de trading
 * Messagerie privée prioritaire
 
-
-Il voit cependant la catégorie OPAL Intensive dans la navigation avec un cadenas.
-
-⸻
-
-OPAL Intensive
-
-Prix : 1 998 €
-
-L'offre Intensive comprend tout OPAL Community avec une couche supplémentaire d'accompagnement individuel.
-
-Inclus :
-
-* tout OPAL Community
-* 2 coachings privés par semaine
-* calendrier des coachings
-* suivi personnalisé
-* objectifs personnalisés
-* comptes-rendus de coaching
-* ressources personnalisées
-* historique de l'accompagnement
-
-À terme, le système doit permettre d'attribuer un client Intensive à un coach.
+À terme, le système doit permettre d'attribuer un client à un coach.
 
 Exemple :
 
@@ -398,36 +376,9 @@ L'objectif est de minimiser au maximum les manipulations manuelles.
 
 ⸻
 
-12. OPAL Intensive
+12. OPAL Intensive (Accompagnement)
 
-Cette section dépend des permissions utilisateur.
-
-Community
-
-La catégorie est visible mais verrouillée :
-
-🔒 OPAL Intensive
-
-En cliquant dessus, l'utilisateur arrive sur une page présentant :
-
-* l'accompagnement individuel
-* 2 coachings privés par semaine
-* suivi personnalisé
-* objectifs
-* comptes-rendus
-* calendrier de coaching
-
-CTA :
-
-CONTACTER MAXYM
-
-Cette page doit être informative et élégante, pas agressive.
-
-⸻
-
-Intensive
-
-Pour les utilisateurs Intensive, la section est débloquée.
+Puisque tous les utilisateurs sont désormais sur l'offre Intensive, cette section est débloquée pour tout le monde par défaut.
 
 OPAL Intensive
 ├── Coaching
@@ -492,8 +443,7 @@ User
 
 Plans :
 
-community
-intensive
+intensive (Offre Unique)
 
 Statuts :
 
@@ -501,23 +451,11 @@ active
 inactive
 cancelled
 
-L'interface et les permissions doivent dépendre du plan.
-
 ⸻
 
 14. Permissions
 
-Community :
-
-Dashboard       YES
-Academy         YES
-Trading         YES
-Systems         YES
-Community       YES
-Live            YES
-Intensive       LOCKED
-
-Intensive :
+Puisqu'il n'y a plus qu'une seule offre, tous les utilisateurs ont un accès total :
 
 Dashboard       YES
 Academy         YES
@@ -527,11 +465,9 @@ Community       YES
 Live            YES
 Intensive       YES
 
-Les permissions importantes doivent être vérifiées côté serveur / backend.
+Les permissions importantes (comme la séparation des données entre utilisateurs) doivent être vérifiées côté serveur / backend.
 
-Ne jamais faire confiance uniquement au frontend pour sécuriser l'accès aux données.
-
-Un utilisateur Community ne doit jamais pouvoir accéder directement aux données privées d'un utilisateur Intensive simplement en modifiant une URL.
+Ne jamais faire confiance uniquement au frontend pour sécuriser l'accès aux données. Un utilisateur ne doit jamais pouvoir accéder aux données privées d'un autre utilisateur en modifiant une URL.
 
 ⸻
 
@@ -717,9 +653,8 @@ Google Antigravity
                     ▼
                  Permissions
                     │
-           ┌────────┴─────────┐
-           ▼                  ▼
-       Community           Intensive
+                    ▼
+               Intensive (All Access)
 
 ⸻
 
@@ -796,8 +731,7 @@ L'architecture doit pouvoir évoluer progressivement.
 Objectif :
 
 V1
-0–500 Community
-0–20 Intensive
+0–50 Intensive
 ↓
 V2
 500–2,000 Community
