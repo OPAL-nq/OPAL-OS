@@ -370,7 +370,7 @@ export function Sidebar({ profile }: SidebarProps) {
                   {authorName}
                 </span>
                 <span className="text-[10px] text-neutral-400 capitalize truncate">
-                  Plan {profile?.plan || 'Community'}
+                  Plan {profile?.plan === 'intensive' ? 'Intensive' : 'Membre'}
                 </span>
               </div>
             </div>
@@ -383,7 +383,7 @@ export function Sidebar({ profile }: SidebarProps) {
                   : 'bg-white/5 text-neutral-400 border-white/10'
               )}
             >
-              {profile?.plan === 'intensive' ? 'Intensive' : 'Community'}
+              {profile?.plan === 'intensive' ? 'Intensive' : 'Membre'}
             </span>
           </div>
         )}

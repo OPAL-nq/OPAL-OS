@@ -7,11 +7,9 @@ import { useRouter } from 'next/navigation';
 import {
   Check,
   Flame,
-  GraduationCap,
   ShieldCheck,
   Lock,
   ArrowRight,
-  ArrowLeft,
   Sparkles,
   Loader2,
   AlertCircle,
@@ -20,6 +18,13 @@ import {
   Mail,
   User as UserIcon,
   KeyRound,
+  GraduationCap,
+  TrendingUp,
+  Radio,
+  Cpu,
+  MessageSquare,
+  Award,
+  Zap,
 } from 'lucide-react';
 import { WHOP_PRODUCTS, WHOP_PLANS } from '@/lib/whop/constants';
 import {
@@ -47,38 +52,19 @@ const WhopCheckoutEmbed = dynamic(
   }
 );
 
-interface CheckoutFlowProps {
-  initialOffer?: 'academy' | 'intensive';
-}
-
-export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
+export function CheckoutFlow() {
   const router = useRouter();
 
-  // Step state: 'select' | 'checkout' | 'verifying' | 'confirmed'
+  // Step state: 'checkout' | 'verifying' | 'confirmed'
   const [currentStep, setCurrentStep] = useState<
-    'select' | 'checkout' | 'verifying' | 'confirmed'
-  >('select');
+    'checkout' | 'verifying' | 'confirmed'
+  >('checkout');
 
-  // Selected offer
-  const [selectedOffer, setSelectedOffer] = useState<'academy' | 'intensive'>(
-    initialOffer === 'intensive' ? 'intensive' : 'academy'
-  );
-
-  const selectedPlanId =
-    selectedOffer === 'intensive'
-      ? WHOP_PLANS.INTENSIVE
-      : WHOP_PLANS.ACADEMY;
-
-  const selectedProductId =
-    selectedOffer === 'intensive'
-      ? WHOP_PRODUCTS.INTENSIVE
-      : WHOP_PRODUCTS.ACADEMY;
+  const selectedPlanId = WHOP_PLANS.INTENSIVE;
+  const selectedProductId = WHOP_PRODUCTS.INTENSIVE;
 
   // Buyer & verification state
   const [capturedEmail, setCapturedEmail] = useState<string>('');
-  const [verifiedPlan, setVerifiedPlan] = useState<'community' | 'intensive'>(
-    initialOffer === 'intensive' ? 'intensive' : 'community'
-  );
   const [isExistingAccount, setIsExistingAccount] = useState<boolean>(false);
   const [verificationError, setVerificationError] = useState<string | null>(null);
   const [isPollingVerification, setIsPollingVerification] = useState<boolean>(false);
@@ -98,18 +84,12 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
     }
   }, [capturedEmail, accountEmail]);
 
-  const handleProceedToCheckout = (offer: 'academy' | 'intensive') => {
-    setSelectedOffer(offer);
-    setCurrentStep('checkout');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
   const directWhopUrl = `https://whop.com/checkout/${selectedPlanId}`;
 
   // Triggered when Whop payment completes inside embed
   const handleWhopComplete = async (
-    planId: string,
-    receiptId?: string,
+    _planId: string,
+    _receiptId?: string,
     result?: any
   ) => {
     setCurrentStep('verifying');
@@ -140,7 +120,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
           );
           if (check.verified) {
             verified = true;
-            if (check.plan) setVerifiedPlan(check.plan);
             setIsExistingAccount(!!check.isExistingUser);
             break;
           }
@@ -151,9 +130,6 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
       await new Promise((r) => setTimeout(r, 1500));
     }
 
-    setVerifiedPlan(
-      selectedProductId === WHOP_PRODUCTS.INTENSIVE ? 'intensive' : 'community'
-    );
     setCurrentStep('confirmed');
   };
 
@@ -174,13 +150,12 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
         selectedProductId
       );
       if (check.verified) {
-        if (check.plan) setVerifiedPlan(check.plan);
         setIsExistingAccount(!!check.isExistingUser);
         setCapturedEmail(accountEmail.trim());
         setCurrentStep('confirmed');
       } else {
         setVerificationError(
-          "Paiement non trouvé pour cet email. Si vous venez de payer, attendez quelques secondes puis cliquez à nouveau sur Vérifier."
+          "Paiement non trouvé pour cet email. Si vous venez de payer sur Whop, attendez quelques secondes puis cliquez à nouveau sur Vérifier."
         );
       }
     } catch (err: any) {
@@ -242,7 +217,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
     <div className="min-h-screen bg-[#0A0A0A] text-white flex flex-col justify-between selection:bg-[#39FF14] selection:text-black">
       {/* Top Header Navigation */}
       <header className="border-b border-white/5 bg-[#0D0D0D]/80 backdrop-blur-md sticky top-0 z-40">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
           <Link href="/checkout" className="flex items-center gap-2.5 group">
             <div className="w-8 h-8 rounded-lg bg-[#141414] border border-[#39FF14]/30 flex items-center justify-center shrink-0 group-hover:border-[#39FF14] transition-colors">
               <div className="w-2.5 h-2.5 rounded-full bg-[#39FF14] shadow-[0_0_10px_#39FF14]" />
@@ -251,8 +226,8 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
               <span className="text-base font-bold tracking-wider text-white leading-none">
                 OPAL
               </span>
-              <span className="text-[9px] uppercase tracking-widest text-neutral-400 leading-tight">
-                Trading OS
+              <span className="text-[9px] uppercase tracking-widest text-[#39FF14] leading-tight font-bold">
+                Intensive OS
               </span>
             </div>
           </Link>
@@ -272,328 +247,252 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
       </header>
 
       {/* Main Container */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
         {/* ================================================================= */}
-        {/* STEP 1: OFFER SELECTION                                           */}
+        {/* CHECKOUT STEP: PRESENTATION + EMBEDDED WHOP PAYMENT               */}
         {/* ================================================================= */}
-        {currentStep === 'select' && (
+        {currentStep === 'checkout' && (
           <div className="space-y-10 animate-in fade-in duration-300">
-            <div className="text-center max-w-2xl mx-auto space-y-3">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#39FF14]/10 border border-[#39FF14]/30 text-[#39FF14] text-xs font-bold uppercase tracking-wider">
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>Accès Officiel OPAL OS</span>
+            {/* Hero Header */}
+            <div className="text-center max-w-3xl mx-auto space-y-3">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#39FF14]/10 border border-[#39FF14]/30 text-[#39FF14] text-xs font-black uppercase tracking-wider shadow-[0_0_20px_rgba(57,255,20,0.15)]">
+                <Flame className="w-4 h-4 fill-current" />
+                <span>Programme Élite • Accompagnement 1-on-1</span>
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold tracking-tight text-white">
-                Choisis ton accompagnement
+                Rejoindre <span className="text-[#39FF14]">OPAL Intensive</span>
               </h1>
-              <p className="text-sm sm:text-base text-neutral-400 leading-relaxed">
-                Accède à l'écosystème OPAL et choisis le niveau d'accompagnement
-                adapté à ton objectif de rentabilité sur le marché des Futures.
+              <p className="text-sm sm:text-base text-neutral-400 leading-relaxed max-w-2xl mx-auto">
+                L'accompagnement individuel sur-mesure et l'écosystème complet de trading
+                des Futures (NQ & ES) pour structurer votre exécution et accélérer votre rentabilité.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8 max-w-5xl mx-auto items-stretch">
-              {/* CARD 1: ACADEMY */}
-              <div
-                className={cn(
-                  'rounded-2xl bg-[#141414] border transition-all duration-200 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden',
-                  selectedProductId === WHOP_PRODUCTS.ACADEMY
-                    ? 'border-[#39FF14]/50 shadow-[0_0_30px_rgba(57,255,20,0.1)] ring-1 ring-[#39FF14]/40'
-                    : 'border-white/10 hover:border-white/20'
-                )}
-              >
-                <div className="space-y-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="w-10 h-10 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                        <GraduationCap className="w-5 h-5" />
+            {/* 2-Column Grid Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
+              {/* LEFT COLUMN: INTENSIVE VALUE STACK & DETAILS (7 COLS) */}
+              <div className="lg:col-span-7 space-y-6">
+                {/* Main Card */}
+                <div className="rounded-2xl bg-[#141414] border border-[#39FF14]/40 p-6 sm:p-8 relative overflow-hidden shadow-[0_0_35px_rgba(57,255,20,0.12)] bg-gradient-to-b from-[#141414] via-[#141414] to-[#121c12]">
+                  <div className="absolute top-0 right-0 bg-[#39FF14] text-black text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-bl-xl shadow-lg">
+                    Offre Exclusive
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Header with Title & Price */}
+                    <div className="space-y-3 pb-6 border-b border-white/10">
+                      <div className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-[#39FF14]/15 border border-[#39FF14]/30 flex items-center justify-center text-[#39FF14] shadow-[0_0_15px_rgba(57,255,20,0.2)]">
+                          <Flame className="w-6 h-6 fill-current" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h2 className="text-2xl font-black text-white">
+                              OPAL Intensive
+                            </h2>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-black bg-[#39FF14]/20 text-[#39FF14] border border-[#39FF14]/30 uppercase">
+                              PRO
+                            </span>
+                          </div>
+                          <p className="text-xs text-neutral-400">
+                            Accompagnement 1-on-1 + Accès intégral Trading OS
+                          </p>
+                        </div>
                       </div>
-                      <h2 className="text-xl font-bold text-white pt-2">
-                        OPAL Academy
-                      </h2>
-                      <p className="text-xs text-neutral-400 leading-snug">
-                        Pour apprendre, pratiquer et progresser en autonomie
-                        avec l'écosystème OPAL.
+
+                      <div className="pt-2">
+                        <div className="flex items-baseline gap-2">
+                          <span className="text-4xl sm:text-5xl font-black text-[#39FF14] tracking-tight">
+                            1 998 €
+                          </span>
+                          <span className="text-xs font-semibold text-neutral-400">
+                            Paiement unique • Accès complet à vie
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pillar 1: 1-on-1 Coaching */}
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#39FF14]">
+                        <Zap className="w-4 h-4" />
+                        <span>Accompagnement Individuel & Mentorat Privé</span>
+                      </div>
+                      <ul className="space-y-2.5 text-xs text-neutral-200">
+                        {[
+                          '2 sessions de coaching privé 1-on-1 par semaine avec Maxym',
+                          'Cockpit dédié OPAL Intensive déverrouillé (objectifs, feuilles de route, comptes-rendus)',
+                          'Audit complet et continu de vos sessions de trading et graphiques',
+                          'Roadmap individualisée et validation progressive de vos étapes vers la rentabilité',
+                          'Canal de messagerie privée prioritaire direct avec vos mentors',
+                          'Comptes rendus détaillés après chaque séance de coaching',
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2.5">
+                            <div className="w-4 h-4 rounded-full bg-[#39FF14]/20 text-[#39FF14] flex items-center justify-center shrink-0 mt-0.5">
+                              <Check className="w-3 h-3 stroke-[3]" />
+                            </div>
+                            <span className="font-medium text-white">{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    {/* Pillar 2: Platform & Tools Included */}
+                    <div className="space-y-3 pt-4 border-t border-white/5">
+                      <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-neutral-400">
+                        <Sparkles className="w-4 h-4 text-[#39FF14]" />
+                        <span>Tout l’Écosystème OPAL OS Inclus</span>
+                      </div>
+                      <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-neutral-300">
+                        {[
+                          'Dashboard de trading & cockpit OPAL OS',
+                          'Academy complète : modules & vidéos institutionnelles',
+                          'Trading Workspace & gestionnaire de sessions',
+                          'Journal de trading & calcul automatique du PnL / Multiple R',
+                          'OPAL Systems & stratégies systématiques NQ/ES',
+                          'Live Sessions hebdomadaires de trading en direct',
+                          'Replays vidéo illimités disponibles 24/7',
+                          'Community privée de traders & salons thématiques',
+                        ].map((item, idx) => (
+                          <li key={idx} className="flex items-start gap-2">
+                            <Check className="w-3.5 h-3.5 text-[#39FF14] shrink-0 mt-0.5" />
+                            <span>{item}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Trust and Guarantee Badges */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                  <div className="p-3.5 rounded-xl bg-[#141414] border border-white/5 flex items-center gap-3">
+                    <ShieldCheck className="w-5 h-5 text-[#39FF14] shrink-0" />
+                    <div className="text-[11px]">
+                      <div className="font-bold text-white">Sécurisé SSL</div>
+                      <div className="text-neutral-500">Chiffrement 256-bit</div>
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[#141414] border border-white/5 flex items-center gap-3">
+                    <Lock className="w-5 h-5 text-neutral-400 shrink-0" />
+                    <div className="text-[11px]">
+                      <div className="font-bold text-white">Partenaire Whop</div>
+                      <div className="text-neutral-500">CB, Apple Pay, Google Pay</div>
+                    </div>
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-[#141414] border border-white/5 flex items-center gap-3">
+                    <Award className="w-5 h-5 text-[#39FF14] shrink-0" />
+                    <div className="text-[11px]">
+                      <div className="font-bold text-white">Accès Immédiat</div>
+                      <div className="text-neutral-500">Déblocage instantané</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* RIGHT COLUMN: DIRECT TERMINAL & FAST CHECKOUT (5 COLS) */}
+              <div className="lg:col-span-5 space-y-6">
+                <div className="bg-[#141414] border border-white/10 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-6 sticky top-24">
+                  <div className="flex items-center justify-between text-xs pb-4 border-b border-white/5">
+                    <div className="flex items-center gap-2 text-white font-bold">
+                      <Lock className="w-4 h-4 text-[#39FF14]" />
+                      <span>Terminal de Paiement Sécurisé</span>
+                    </div>
+                    <span className="text-[#39FF14] font-bold text-[11px]">1 998 €</span>
+                  </div>
+
+                  {/* Direct 1-Click Payment Button */}
+                  <div className="space-y-3">
+                    <a
+                      href={directWhopUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full min-h-[3.5rem] py-3.5 px-4 rounded-xl font-black text-xs sm:text-sm bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_25px_rgba(57,255,20,0.35)] flex items-center justify-center gap-2.5 text-center transition-all group active:scale-95 leading-tight"
+                    >
+                      <CreditCard className="w-5 h-5 text-black shrink-0" />
+                      <span>Payer 1 998 € sur Whop (CB / Apple Pay)</span>
+                      <ExternalLink className="w-4 h-4 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                    </a>
+
+                    <p className="text-center text-[11px] text-neutral-400">
+                      Paiement sécurisé avec validation immédiate de votre adhésion.
+                    </p>
+                  </div>
+
+                  {/* Embedded Whop Checkout View */}
+                  <div className="pt-2 border-t border-white/5 space-y-3">
+                    <div className="w-full min-h-[360px] rounded-xl overflow-hidden bg-black/50 border border-white/5">
+                      <WhopCheckoutEmbed
+                        planId={selectedPlanId}
+                        theme="dark"
+                        themeOptions={{
+                          backgroundColor: '#141414',
+                          accentColor: '#39FF14',
+                        }}
+                        skipRedirect={true}
+                        onIdentityCaptured={(data) => {
+                          if (data?.email) {
+                            setCapturedEmail(data.email);
+                            setAccountEmail(data.email);
+                          }
+                        }}
+                        onComplete={handleWhopComplete}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Instant Verification after payment */}
+                  <div className="p-4 rounded-xl bg-black/60 border border-white/10 space-y-3">
+                    <div className="space-y-1">
+                      <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-[#39FF14]" />
+                        <span>Tu as finalisé ton paiement ?</span>
+                      </h4>
+                      <p className="text-[11px] text-neutral-400">
+                        Saisis l'adresse email utilisée lors du paiement pour débloquer immédiatement ton compte OPAL.
                       </p>
                     </div>
-                  </div>
 
-                  <div className="pt-2 pb-4 border-b border-white/5">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl sm:text-5xl font-black text-white">
-                        59 €
-                      </span>
-                      <span className="text-sm text-neutral-400 font-semibold">
-                        / mois
-                      </span>
+                    <div className="flex gap-2">
+                      <input
+                        type="email"
+                        placeholder="trader@exemple.com"
+                        value={accountEmail}
+                        onChange={(e) => setAccountEmail(e.target.value)}
+                        className="flex-1 px-3.5 py-2 bg-[#141414] border border-white/10 rounded-lg text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#39FF14]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => handleManualVerify()}
+                        disabled={isPollingVerification}
+                        className="px-4 py-2 bg-[#39FF14] hover:bg-[#32e612] text-black font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                      >
+                        {isPollingVerification ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <>
+                            <span>Vérifier</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </>
+                        )}
+                      </button>
                     </div>
-                    <p className="text-[11px] text-neutral-500 mt-1">
-                      Sans engagement • Annulation en 1 clic
-                    </p>
-                  </div>
 
-                  <div className="space-y-3 text-xs">
-                    <p className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider">
-                      Inclus dans l'accès Academy :
-                    </p>
-                    <ul className="space-y-2.5">
-                      {[
-                        'Dashboard de trading & cockpit OPAL OS',
-                        'Academy complète : modules, chapitres & vidéos',
-                        'Trading Workspace & gestionnaire de sessions',
-                        'Trading Journal d’exécution & calcul de PnL',
-                        'OPAL Systems & stratégies systématiques NQ',
-                        'Live Sessions hebdomadaires & interactions',
-                        'Replays vidéo illimités disponibles 24/7',
-                        'Community de traders & salons d’échanges',
-                        'Messagerie privée avec le support OPAL',
-                      ].map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-start gap-2.5 text-neutral-300"
-                        >
-                          <Check className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="pt-8 mt-auto">
-                  <button
-                    type="button"
-                    onClick={() => handleProceedToCheckout('academy')}
-                    className="w-full h-12 rounded-xl font-bold text-sm bg-white/10 hover:bg-white/15 text-white hover:text-[#39FF14] border border-white/10 transition-all flex items-center justify-center gap-2 group"
-                  >
-                    <span>Choisir OPAL Academy</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-
-              {/* CARD 2: INTENSIVE */}
-              <div
-                className={cn(
-                  'rounded-2xl bg-[#141414] border transition-all duration-200 p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden',
-                  selectedOffer === 'intensive'
-                    ? 'border-[#39FF14] shadow-[0_0_35px_rgba(57,255,20,0.18)] ring-2 ring-[#39FF14]/50 bg-gradient-to-b from-[#141414] to-[#121a12]'
-                    : 'border-white/10 hover:border-[#39FF14]/50'
-                )}
-              >
-                <div className="absolute top-0 right-0 bg-[#39FF14] text-black text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-bl-xl shadow-lg">
-                  Accompagnement 1-on-1
-                </div>
-
-                <div className="space-y-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="w-10 h-10 rounded-xl bg-[#39FF14]/15 border border-[#39FF14]/30 flex items-center justify-center text-[#39FF14]">
-                        <Flame className="w-5 h-5 fill-current" />
-                      </div>
-                      <h2 className="text-xl font-bold text-white pt-2 flex items-center gap-2">
-                        <span>OPAL Intensive</span>
-                        <span className="px-2 py-0.5 rounded text-[10px] font-black bg-[#39FF14]/20 text-[#39FF14] border border-[#39FF14]/30 uppercase">
-                          PRO
-                        </span>
-                      </h2>
-                      <p className="text-xs text-neutral-400 leading-snug">
-                        Pour les traders qui veulent un accompagnement
-                        personnalisé et un suivi individuel.
+                    {verificationError && (
+                      <p className="text-[11px] text-yellow-400 flex items-center gap-1.5 pt-1">
+                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                        <span>{verificationError}</span>
                       </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-2 pb-4 border-b border-white/5">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-4xl sm:text-5xl font-black text-[#39FF14]">
-                        1 998 €
-                      </span>
-                    </div>
-                    <p className="text-[11px] text-neutral-400 mt-1">
-                      Paiement unique • Suivi sur-mesure
-                    </p>
-                  </div>
-
-                  <div className="space-y-3 text-xs">
-                    <p className="text-[11px] font-bold text-[#39FF14] uppercase tracking-wider">
-                      Tous les accès Academy PLUS :
-                    </p>
-                    <ul className="space-y-2.5">
-                      {[
-                        'Tous les accès complets OPAL Academy inclus',
-                        'Cockpit dédié OPAL Intensive déverrouillé',
-                        '2 sessions de coaching privé 1-on-1 par semaine',
-                        'Audit complet de vos sessions de trading',
-                        'Suivi personnalisé et validation d’objectifs',
-                        'Comptes rendus détaillés après chaque séance',
-                        'Canal de messagerie privée prioritaire avec vos mentors',
-                        'Roadmap individualisée vers la rentabilité',
-                      ].map((item, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-start gap-2.5 text-white"
-                        >
-                          <Check className="w-4 h-4 text-[#39FF14] shrink-0 mt-0.5" />
-                          <span>{item}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-                <div className="pt-8 mt-auto">
-                  <button
-                    type="button"
-                    onClick={() => handleProceedToCheckout('intensive')}
-                    className="w-full h-12 rounded-xl font-black text-sm bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_20px_rgba(57,255,20,0.3)] transition-all flex items-center justify-center gap-2 group"
-                  >
-                    <span>Choisir OPAL Intensive</span>
-                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap items-center justify-center gap-6 text-xs text-neutral-500 pt-4">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-[#39FF14]" />
-                <span>Paiement sécurisé et chiffré SSL</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Lock className="w-4 h-4 text-neutral-400" />
-                <span>Traitement officiel Whop (Apple Pay, CB, Google Pay)</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ================================================================= */}
-        {/* STEP 2: HYBRID CHECKOUT (EMBED + DIRECT WHOP TERMINAL)            */}
-        {/* ================================================================= */}
-        {currentStep === 'checkout' && (
-          <div className="max-w-2xl mx-auto space-y-6 animate-in fade-in duration-300">
-            {/* Top Bar */}
-            <div className="flex items-center justify-between pb-2 border-b border-white/5">
-              <button
-                type="button"
-                onClick={() => setCurrentStep('select')}
-                className="text-xs text-neutral-400 hover:text-white flex items-center gap-1.5 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Changer d'offre</span>
-              </button>
-
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-neutral-400">Offre choisie :</span>
-                <span className="text-xs font-bold text-[#39FF14]">
-                  {selectedOffer === 'intensive'
-                    ? 'OPAL Intensive (1 998 €)'
-                    : 'OPAL Academy (59 €/mois)'}
-                </span>
-              </div>
-            </div>
-
-            {/* Main Checkout Box */}
-            <div className="bg-[#141414] border border-white/10 rounded-2xl p-6 sm:p-8 shadow-2xl space-y-6">
-              <div className="flex items-center justify-between text-xs pb-4 border-b border-white/5">
-                <div className="flex items-center gap-2 text-white font-bold">
-                  <Lock className="w-4 h-4 text-[#39FF14]" />
-                  <span>Paiement sécurisé propulsé par Whop</span>
-                </div>
-                <span className="text-neutral-500 text-[10px]">Chiffrement 256-bit</span>
-              </div>
-
-              {/* Direct 1-Click Payment Button */}
-              <div className="space-y-3">
-                <a
-                  href={directWhopUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full min-h-[3.5rem] py-3 px-4 rounded-xl font-black text-xs sm:text-sm bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_25px_rgba(57,255,20,0.3)] flex items-center justify-center gap-2 text-center transition-all group active:scale-95 leading-tight"
-                >
-                  <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 text-black shrink-0" />
-                  <span>Procéder au paiement sur Whop (CB / Apple Pay)</span>
-                  <ExternalLink className="w-4 h-4 shrink-0 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
-                </a>
-
-                <p className="text-center text-[11px] text-neutral-400">
-                  Le paiement s'ouvre dans une fenêtre sécurisée Whop pour une compatibilité maximale.
-                </p>
-              </div>
-
-              {/* Embedded Whop Checkout View */}
-              <div className="pt-2 border-t border-white/5 space-y-3">
-                <div className="w-full min-h-[360px] rounded-xl overflow-hidden bg-black/40 border border-white/5">
-                  <WhopCheckoutEmbed
-                    planId={selectedPlanId}
-                    theme="dark"
-                    themeOptions={{
-                      backgroundColor: '#141414',
-                      accentColor: '#39FF14',
-                    }}
-                    skipRedirect={true}
-                    onIdentityCaptured={(data) => {
-                      if (data?.email) {
-                        setCapturedEmail(data.email);
-                        setAccountEmail(data.email);
-                      }
-                    }}
-                    onComplete={handleWhopComplete}
-                  />
-                </div>
-              </div>
-
-              {/* Instant Verification after payment */}
-              <div className="p-4 rounded-xl bg-black/60 border border-white/10 space-y-3">
-                <div className="space-y-1">
-                  <h4 className="text-xs font-bold text-white flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-[#39FF14]" />
-                    <span>Tu as finalisé ton paiement ?</span>
-                  </h4>
-                  <p className="text-[11px] text-neutral-400">
-                    Saisis l'adresse email utilisée lors du paiement pour débloquer immédiatement ton compte OPAL.
-                  </p>
-                </div>
-
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="trader@exemple.com"
-                    value={accountEmail}
-                    onChange={(e) => setAccountEmail(e.target.value)}
-                    className="flex-1 px-3.5 py-2 bg-[#141414] border border-white/10 rounded-lg text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#39FF14]"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => handleManualVerify()}
-                    disabled={isPollingVerification}
-                    className="px-4 py-2 bg-[#39FF14] hover:bg-[#32e612] text-black font-bold text-xs rounded-lg transition-colors flex items-center gap-1.5 shrink-0 disabled:opacity-50"
-                  >
-                    {isPollingVerification ? (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <>
-                        <span>Vérifier</span>
-                        <ArrowRight className="w-3.5 h-3.5" />
-                      </>
                     )}
-                  </button>
+                  </div>
                 </div>
-
-                {verificationError && (
-                  <p className="text-[11px] text-yellow-400 flex items-center gap-1.5 pt-1">
-                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                    <span>{verificationError}</span>
-                  </p>
-                )}
               </div>
             </div>
           </div>
         )}
 
         {/* ================================================================= */}
-        {/* STEP 2.5: VERIFYING PAYMENT STATE                                 */}
+        {/* STEP: VERIFYING PAYMENT STATE                                     */}
         {/* ================================================================= */}
         {currentStep === 'verifying' && (
           <div className="max-w-md mx-auto py-16 text-center space-y-6 animate-in fade-in duration-300">
@@ -602,21 +501,21 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
             </div>
             <div className="space-y-2">
               <h2 className="text-2xl font-bold text-white">
-                Vérification du paiement...
+                Vérification du paiement en cours...
               </h2>
               <p className="text-xs text-neutral-400">
-                Synchronisation de votre adhésion avec le réseau Whop en cours.
+                Synchronisation de votre adhésion OPAL Intensive avec le réseau Whop.
               </p>
             </div>
           </div>
         )}
 
         {/* ================================================================= */}
-        {/* STEP 3: PAYMENT CONFIRMED & ACCOUNT CREATION                      */}
+        {/* STEP: PAYMENT CONFIRMED & ACCOUNT CREATION                        */}
         {/* ================================================================= */}
         {currentStep === 'confirmed' && (
-          <div className="max-w-lg mx-auto space-y-6 animate-in fade-in duration-300">
-            <div className="p-6 rounded-2xl bg-[#141414] border border-[#39FF14]/40 text-center space-y-3 shadow-[0_0_30px_rgba(57,255,20,0.1)]">
+          <div className="max-w-lg mx-auto space-y-6 animate-in fade-in duration-300 py-6">
+            <div className="p-6 rounded-2xl bg-[#141414] border border-[#39FF14]/40 text-center space-y-3 shadow-[0_0_30px_rgba(57,255,20,0.15)]">
               <div className="w-12 h-12 rounded-full bg-[#39FF14] text-black flex items-center justify-center mx-auto font-black shadow-[0_0_15px_#39FF14]">
                 <Check className="w-6 h-6 stroke-[3]" />
               </div>
@@ -624,11 +523,9 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                 Paiement confirmé ✓
               </h2>
               <p className="text-xs text-neutral-300">
-                Votre accès au plan{' '}
+                Votre accès exclusif à{' '}
                 <span className="font-bold text-[#39FF14]">
-                  {verifiedPlan === 'intensive'
-                    ? 'OPAL Intensive'
-                    : 'OPAL Academy'}
+                  OPAL Intensive (1 998 €)
                 </span>{' '}
                 est débloqué.
               </p>
@@ -642,7 +539,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     Un compte OPAL existe déjà avec cette adresse email
                   </h3>
                   <p className="text-xs text-neutral-400 leading-relaxed">
-                    Votre nouvel accès a été automatiquement associé à votre compte ({accountEmail}). Connectez-vous simplement pour accéder à votre cockpit.
+                    Votre accès Intensive a été automatiquement associé à votre compte ({accountEmail}). Connectez-vous simplement pour accéder à votre cockpit.
                   </p>
                 </div>
 
@@ -662,7 +559,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                     Crée ton compte OPAL
                   </h3>
                   <p className="text-xs text-neutral-400">
-                    Configure tes identifiants pour finaliser ton inscription.
+                    Configure tes identifiants pour finaliser ton inscription au programme Intensive.
                   </p>
                 </div>
 
@@ -685,7 +582,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                         required
                         value={fullName}
                         onChange={(e) => setFullName(e.target.value)}
-                        placeholder="Jean Dupont"
+                        placeholder="Maxym"
                         className="w-full pl-10 pr-3.5 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#39FF14]/50 focus:ring-1 focus:ring-[#39FF14]/50"
                       />
                     </div>
@@ -702,7 +599,7 @@ export function CheckoutFlow({ initialOffer }: CheckoutFlowProps) {
                         required
                         value={accountEmail}
                         onChange={(e) => setAccountEmail(e.target.value)}
-                        placeholder="jean.dupont@example.com"
+                        placeholder="trader@exemple.com"
                         className="w-full pl-10 pr-3.5 py-2.5 bg-black/60 border border-white/10 rounded-xl text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#39FF14]/50 focus:ring-1 focus:ring-[#39FF14]/50"
                       />
                     </div>

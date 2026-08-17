@@ -49,7 +49,7 @@ function SignupForm() {
                       href="/checkout"
                       className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#39FF14] hover:underline"
                     >
-                      Découvrir les offres et commander mon accès sur le Checkout OPAL &rarr;
+                      Commander mon accès OPAL Intensive sur le Checkout &rarr;
                     </Link>
                   </div>
               )}
@@ -147,7 +147,7 @@ function SignupForm() {
           href="/checkout"
           className="w-full h-10 rounded-xl bg-white/5 hover:bg-white/10 text-neutral-200 hover:text-[#39FF14] border border-white/10 hover:border-[#39FF14]/30 font-semibold flex items-center justify-center gap-2 transition-all group"
         >
-          <span>Découvrir nos offres & Rejoindre OPAL</span>
+          <span>Rejoindre le Programme OPAL Intensive (1 998 €)</span>
           <span className="text-[#39FF14] group-hover:translate-x-0.5 transition-transform">&rarr;</span>
         </Link>
       </div>

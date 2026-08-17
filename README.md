@@ -64,25 +64,22 @@ avant la sophistication.
 
 ⸻
 
-3. Offres OPAL
+3. Offre OPAL
 
-OPAL Community
+OPAL Intensive
 
-Prix : 59 €/mois
+Prix : 1 998 € (Paiement unique / Accompagnement sur-mesure)
 
-Offre autonome et scalable.
+Offre d'élite avec accompagnement 1-on-1 personnalisé.
 
 Elle donne accès à :
 
-* OPAL Academy
-* OPAL Trading
-* OPAL Systems
-* OPAL Community
-* OPAL Live
-* coaching collectif / masterclasses
-* ressources OPAL
+* Tout l'écosystème OPAL OS (Academy, Trading, Systems, Community, Live)
+* 2 coachings privés 1-on-1 par semaine avec Maxym
+* Espace et Cockpit personnel OPAL Intensive déverrouillé (objectifs, feuilles de route, comptes-rendus)
+* Audit continu des sessions de trading
+* Messagerie privée prioritaire
 
-Le membre Community n'a pas accès à l'espace personnel OPAL Intensive.
 
 Il voit cependant la catégorie OPAL Intensive dans la navigation avec un cadenas.
 
@@ -727,24 +724,21 @@ Google Antigravity
 ⸻
 
 21. Paiements
-
-Stripe sera utilisé pour gérer les paiements.
-
-Community :
-
-59 €/month
-
+ 
+Whop est utilisé pour gérer les paiements.
+ 
 Intensive :
-
-1 998 €
-
-Le système doit être capable de relier l'état du paiement au plan OPAL.
-
+ 
+1 998 € (Paiement unique)
+ 
+Le système relie l'état du paiement au compte OPAL OS.
+ 
 Exemple :
-
-Stripe
+ 
+Whop
  ↓
-Payment / Subscription
+Payment / Membership
+
  ↓
 OPAL User
  ↓

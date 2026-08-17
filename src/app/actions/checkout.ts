@@ -153,7 +153,7 @@ export async function completeCheckoutRegistration(formData: {
       m.whop_product_id === WHOP_PLANS.INTENSIVE ||
       m.plan_type === 'intensive'
   );
-  const targetPlan: UserPlan = hasIntensive ? 'intensive' : 'community';
+  const targetPlan: UserPlan = 'intensive';
 
   // 3. Create Supabase Auth user
   const supabase = await createClient();

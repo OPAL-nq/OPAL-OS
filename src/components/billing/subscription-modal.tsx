@@ -109,7 +109,7 @@ export function SubscriptionModal({ open, onOpenChange }: SubscriptionModalProps
                     <div>
                       <div className="flex items-center gap-2">
                         <h3 className="text-base font-bold text-white">
-                          {details?.planName || 'OPAL Academy'}
+                          {details?.planName || 'OPAL Intensive'}
                         </h3>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-[#39FF14]/15 text-[#39FF14] border border-[#39FF14]/30 flex items-center gap-1">
                           <span className="w-1.5 h-1.5 rounded-full bg-[#39FF14] animate-pulse" />

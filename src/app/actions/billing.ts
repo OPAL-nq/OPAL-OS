@@ -65,10 +65,10 @@ export async function getUserSubscriptionDetails(): Promise<{
 
     const isIntensive = plan === 'intensive' || activeMembership?.plan_type === 'intensive';
 
-    const planName = isIntensive ? 'OPAL Intensive' : 'OPAL Academy';
-    const priceFormatted = isIntensive ? '1 998 €' : '59 € / mois';
-    const billingPeriod = isIntensive ? 'Accès à vie / Paiement unique' : 'Mensuel (Sans engagement)';
-    const isRecurring = !isIntensive;
+    const planName = isIntensive ? 'OPAL Intensive' : 'OPAL OS';
+    const priceFormatted = isIntensive ? '1 998 €' : 'Accès Membre';
+    const billingPeriod = isIntensive ? 'Accès à vie • Accompagnement 1-on-1' : 'Accès plateforme';
+    const isRecurring = false;
 
     const startsAt = activeMembership?.starts_at || profile?.created_at || null;
     const expiresAt = activeMembership?.expires_at || null;

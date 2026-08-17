@@ -309,7 +309,7 @@ export function MobileNav({ profile, isOpen, onClose }: MobileNavProps) {
               </div>
 
               <span className="px-2 py-0.5 text-[9px] font-bold uppercase rounded bg-[#39FF14]/15 text-[#39FF14] border border-[#39FF14]/30 shrink-0">
-                {profile?.plan === 'intensive' ? 'Intensive' : 'Academy'}
+                {profile?.plan === 'intensive' ? 'Intensive' : 'Membre'}
               </span>
             </div>
 
