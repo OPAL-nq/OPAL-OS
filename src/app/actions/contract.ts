@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { ContractDraft, TraderContract } from '@/types/contract';
 
 /**
@@ -8,7 +8,7 @@ import { ContractDraft, TraderContract } from '@/types/contract';
  */
 export async function getActiveContract(): Promise<{ success: boolean; contract: TraderContract | null; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {
@@ -22,9 +22,9 @@ export async function getActiveContract(): Promise<{ success: boolean; contract:
       .eq('is_active', true)
       .order('signed_at', { ascending: false })
       .limit(1)
-      .single();
+      .maybeSingle();
 
-    if (error && error.code !== 'PGRST116') { // PGRST116 is "No rows found"
+    if (error) {
       console.error('Error fetching contract:', error);
       return { success: false, contract: null, error: error.message };
     }
@@ -41,7 +41,7 @@ export async function getActiveContract(): Promise<{ success: boolean; contract:
  */
 export async function signNewContract(draft: ContractDraft): Promise<{ success: boolean; contract?: TraderContract; error?: string }> {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

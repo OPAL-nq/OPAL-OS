@@ -7,9 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SignaturePad } from './signature-pad';
 import { ContractDraft } from '@/types/contract';
-import { ShieldAlert, Info, ArrowRight, Save } from 'lucide-react';
+import { ShieldAlert, Info, ArrowRight, Save, CheckCircle2, AlertCircle } from 'lucide-react';
 import { signNewContract } from '@/app/actions/contract';
-import { toast } from 'sonner';
 
 interface ContractBuilderProps {
   onContractSigned: () => void;
@@ -18,6 +17,7 @@ interface ContractBuilderProps {
 export function ContractBuilder({ onContractSigned }: ContractBuilderProps) {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // Form State
   const [maxDailyLoss, setMaxDailyLoss] = useState<string>('500');
@@ -28,12 +28,19 @@ export function ContractBuilder({ onContractSigned }: ContractBuilderProps) {
   const [setups, setSetups] = useState<string>('Pullback M1, Breakout M5');
   const [signature, setSignature] = useState<string | null>(null);
 
-  const handleNext = () => setStep((s) => Math.min(s + 1, 3));
-  const handlePrev = () => setStep((s) => Math.max(s - 1, 1));
+  const handleNext = () => {
+    setErrorMessage(null);
+    setStep((s) => Math.min(s + 1, 3));
+  };
+  const handlePrev = () => {
+    setErrorMessage(null);
+    setStep((s) => Math.max(s - 1, 1));
+  };
 
   const handleSign = async () => {
+    setErrorMessage(null);
     if (!signature) {
-      toast.error('Veuillez apposer votre signature');
+      setErrorMessage('Veuillez apposer votre signature sur le cadre ci-dessous.');
       return;
     }
 
@@ -53,10 +60,9 @@ export function ContractBuilder({ onContractSigned }: ContractBuilderProps) {
     setIsSubmitting(false);
 
     if (res.success) {
-      toast.success('Contrat signé avec succès !');
       onContractSigned();
     } else {
-      toast.error(`Erreur: ${res.error}`);
+      setErrorMessage(res.error || 'Une erreur est survenue lors de la signature.');
     }
   };
 
@@ -203,6 +209,14 @@ export function ContractBuilder({ onContractSigned }: ContractBuilderProps) {
           </div>
         )}
       </div>
+
+      {/* Error message banner */}
+      {errorMessage && (
+        <div className="flex items-center gap-2 p-3.5 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-semibold animate-in fade-in">
+          <AlertCircle className="w-4 h-4 shrink-0" />
+          <span>{errorMessage}</span>
+        </div>
+      )}
 
       {/* Navigation Buttons */}
       <div className="flex items-center justify-between pt-6 border-t border-white/10">
