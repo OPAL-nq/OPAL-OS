@@ -9,6 +9,7 @@ import { PropFirmSummaryWidget } from './prop-firm-guardian/prop-firm-summary-wi
 import { PropFirmGuardianView } from './prop-firm-guardian/prop-firm-guardian-view';
 import { PsychologyTabView } from './psychology/psychology-tab-view';
 import { InstitutionalAuditModal } from './audit/institutional-audit-modal';
+import { DailyProtocolWidget } from './protocol/daily-protocol-widget';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -18,18 +19,25 @@ import {
   Shield,
   UploadCloud,
   BrainCircuit,
+  Flame,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { PropFirmAccount } from '@/types/prop-firm';
+import type { DailyProtocol, UserStreak } from '@/types/protocol';
 
 interface TradingHubTabsProps {
   trades: Trade[];
   stats: TradeStats;
   accounts?: PropFirmAccount[];
+  protocolData?: {
+    protocol: DailyProtocol;
+    streak: UserStreak;
+    recentDays: DailyProtocol[];
+  };
 }
 
-export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsProps) {
-  const [activeTab, setActiveTab] = useState<'journal' | 'stats' | 'psychology' | 'guardian'>('journal');
+export function TradingHubTabs({ trades, stats, accounts = [], protocolData }: TradingHubTabsProps) {
+  const [activeTab, setActiveTab] = useState<'journal' | 'stats' | 'psychology' | 'guardian' | 'protocol'>('journal');
 
   return (
     <div className="space-y-8">
@@ -54,6 +62,19 @@ export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsP
             >
               <BookOpen className="w-4 h-4 shrink-0" />
               <span>Journal ({trades.length})</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('protocol')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                activeTab === 'protocol'
+                  ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Flame className="w-4 h-4 shrink-0 text-orange-400" />
+              <span>Protocole & Streaks 🔥</span>
             </button>
 
             <button
@@ -219,6 +240,17 @@ export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsP
               />
             </Card>
           </div>
+        </div>
+      )}
+
+      {/* TAB 2: PROTOCOLE & STREAKS */}
+      {activeTab === 'protocol' && protocolData && (
+        <div className="space-y-6">
+          <DailyProtocolWidget
+            initialProtocol={protocolData.protocol}
+            initialStreak={protocolData.streak}
+            recentDays={protocolData.recentDays}
+          />
         </div>
       )}
 

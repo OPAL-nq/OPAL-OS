@@ -14,6 +14,7 @@
 - **Feature 04 : Tilt Radar & Psychologie** (Trading) — *Radar de session, score de discipline, matrice émotionnelle et harsh truth*.
 - **Feature 06 : Export PDF d'Audit Institutionnel** (Trading & Intensive) — *Générateur de dossiers PDF multi-pages HD avec métriques Hedge Fund, courbe d'équité et validation mentor*.
 - **Feature 07 : Trading Cards & Viral Proof-of-Trade** (Trading Journal) — *Générateur de cartes de trades stylisées (Story 9:16 / Post 1:1, thèmes Cyber, Indigo, Gold, export PNG & presse-papier Discord)*.
+- **Feature 08 : Protocole Quotidien & Streaks 🔥** (Dashboard & Trading) — *Checklist quotidienne 4 étapes, validation des journées de patience, compteur de flamme avec weekend freeze et badges déblocables*.
 
 ---
 
@@ -21,7 +22,6 @@
 
 | # | Spécification | Espace Cible | Priorité | Description Synthétique |
 | :---: | :--- | :--- | :---: | :--- |
-| **08** | [**Protocole Quotidien & Streaks 🔥**](./ROADMAP_DAILY_PROTOCOL_STREAKS.md) | Dashboard & Trading | 🟢 Moyenne | Checklist quotidienne 4 étapes, compteur de séries de discipline et badges déblocables. |
 | **09** | [**Simulateur Monte-Carlo & Scaling Plan**](./ROADMAP_MONTE_CARLO_SCALING.md) | Trading | 🟢 Moyenne | 1 000 itérations de projection de capital et tableau de passage des Micro aux Mini contrats. |
 | **10** | [**Charte & Contrat de Trading Pro**](./ROADMAP_TRADER_OPERATING_CONTRACT.md) | Intensive & Trading | 🟢 Moyenne | Contrat d'engagement officiel avec signature numérique et détection des ruptures de règles. |
 

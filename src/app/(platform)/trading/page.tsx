@@ -1,5 +1,6 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
+import { getTodayProtocol } from '@/app/actions/protocol';
 import { Trade, TradeStats } from '@/types/trading';
 import { TradingHubTabs } from '@/components/trading/trading-hub-tabs';
 import { TrendingUp } from 'lucide-react';
@@ -12,6 +13,7 @@ export default async function TradingHubPage() {
 
   let trades: Trade[] = [];
   let accounts: any[] = [];
+  const todayProtocolData = await getTodayProtocol();
 
   try {
     const [tradesRes, accountsRes] = await Promise.allSettled([
@@ -79,8 +81,13 @@ export default async function TradingHubPage() {
         </div>
       </div>
 
-      {/* Main Tabs: Journal, Stats, Guardian & Integrated Economic Calendar */}
-      <TradingHubTabs trades={trades} stats={stats} accounts={accounts} />
+      {/* Main Tabs: Journal, Stats, Guardian, Protocol & Integrated Economic Calendar */}
+      <TradingHubTabs
+        trades={trades}
+        stats={stats}
+        accounts={accounts}
+        protocolData={todayProtocolData}
+      />
     </div>
   );
 }

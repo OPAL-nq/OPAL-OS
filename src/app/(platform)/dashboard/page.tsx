@@ -24,6 +24,8 @@ import {
 import Link from 'next/link';
 import type { Profile, Module, Lesson, Trade } from '@/types';
 import { OnboardingModal } from '@/components/onboarding/onboarding-modal';
+import { getTodayProtocol } from '@/app/actions/protocol';
+import { DailyProtocolWidget } from '@/components/trading/protocol/daily-protocol-widget';
 
 export const dynamic = 'force-dynamic';
 
@@ -216,6 +218,11 @@ export default async function DashboardPage() {
     };
   }
 
+  // ----------------------------------------------------
+  // 6. Dynamic Daily Protocol & Streaks Query
+  // ----------------------------------------------------
+  const todayProtocolData = await getTodayProtocol();
+
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
       {/* Onboarding Modal for First-Time Users */}
@@ -259,6 +266,13 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Daily Protocol & Streaks Interactive Widget */}
+      <DailyProtocolWidget
+        initialProtocol={todayProtocolData.protocol}
+        initialStreak={todayProtocolData.streak}
+        recentDays={todayProtocolData.recentDays}
+      />
 
       {/* SECTION 5: OPAL Intensive Widget (For Intensive members only) */}
       {intensiveData && (
