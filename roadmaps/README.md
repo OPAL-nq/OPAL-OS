@@ -21,9 +21,8 @@
 ### ⏳ Prochaines Fonctionnalités en File d'Attente
 
 | # | Spécification | Espace Cible | Priorité | Description Synthétique |
-| :---: | :--- | :--- | :---: | :--- |
+| :---: | :--- | :--- | :--- | :--- |
 | **09** | [**Simulateur Monte-Carlo & Scaling Plan**](./ROADMAP_MONTE_CARLO_SCALING.md) | Trading | 🟢 Moyenne | 1 000 itérations de projection de capital et tableau de passage des Micro aux Mini contrats. |
-| **10** | [**Charte & Contrat de Trading Pro**](./ROADMAP_TRADER_OPERATING_CONTRACT.md) | Intensive & Trading | 🟢 Moyenne | Contrat d'engagement officiel avec signature numérique et détection des ruptures de règles. |
 
 ---
 
