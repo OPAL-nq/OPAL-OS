@@ -57,14 +57,14 @@ const PSYCHOLOGY_TAGS = [
 ];
 
 const TECHNIQUE_TAGS = [
-  'Biais directionnel HTF (Daily / 4H)',
-  'Identification des zones de liquidité (BSL / SSL)',
-  'Lecture du Footprint & Carnet d’ordres',
-  'Gestion du timing (Session NY AM vs PM)',
-  'Alignement Multi-Timeframes (M15 / M5 / M1)',
-  'Placement précis du Stop Loss & TP',
-  'Gestion des FVG / Imbalances',
-  'Filtrage des faux signaux / Chop',
+  'Volume Profile (Previous Day VAH / VAL / POC)',
+  'VWAP de Session (Confluence & Réactions)',
+  'Hauts & Bas de Session (Asian / London High & Low)',
+  'Réactions VAH / VAL (Breakout / Rejection)',
+  'Inversions de tendance & Structure de marché',
+  'Inefficiences & Efficiences de marché',
+  'Entrées sur IFVG / BPR / FVG',
+  'Calibrage du Stop Loss & Prise de profit en ticks',
 ];
 
 const RISK_TAGS = [

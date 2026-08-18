@@ -19,6 +19,8 @@ import {
   Save,
   ArrowLeft,
   Trash2,
+  Zap,
+  Activity,
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -72,13 +74,13 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-4xl mx-auto pb-12">
       {/* Header Bar */}
       <div className="flex items-center justify-between">
         <Link href="/trading">
           <Button variant="ghost" size="sm" type="button" className="text-neutral-400 hover:text-white">
             <ArrowLeft className="w-4 h-4 mr-1.5" />
-            Retour au Workspace
+            Retour au Trading Hub
           </Button>
         </Link>
         <div className="flex items-center gap-2">
@@ -98,7 +100,7 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
           <Button
             type="submit"
             disabled={loading}
-            className="bg-[#39FF14] text-black hover:bg-[#32e012] font-bold px-6 shadow-[0_0_20px_rgba(57,255,20,0.3)]"
+            className="bg-[#39FF14] text-black hover:bg-[#32e012] font-bold px-6 shadow-[0_0_20px_rgba(57,255,20,0.3)] text-xs h-9"
           >
             <Save className="w-4 h-4 mr-2" />
             {loading ? 'Enregistrement...' : initialData ? 'Mettre à jour le plan' : 'Valider mon plan de session'}
@@ -111,7 +113,7 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#39FF14] uppercase tracking-wider">
             <Compass className="w-4 h-4" />
-            <span>Étape 1 — Contexte & Biais Initial</span>
+            <span>Étape 1 — Contexte & Biais Directionnel</span>
           </div>
           <CardTitle className="text-lg text-white">Paramètres de la Session</CardTitle>
         </CardHeader>
@@ -126,14 +128,14 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
                 name="session_date"
                 value={sessionDate}
                 onChange={(e) => setSessionDate(e.target.value)}
-                className="bg-black/50 border-white/10 text-white font-mono"
+                className="bg-black/50 border-white/10 text-white font-mono text-xs"
                 required
               />
             </div>
 
             <div>
               <label className="text-xs font-medium text-neutral-300 block mb-1.5">
-                Instrument Actif
+                Instrument Actif (CME Futures)
               </label>
               <div className="grid grid-cols-4 gap-1.5">
                 {Object.keys(INSTRUMENTS).map((key) => (
@@ -143,7 +145,7 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
                     onClick={() => setInstrument(key)}
                     className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all ${
                       instrument === key
-                        ? 'bg-[#39FF14]/10 border-[#39FF14] text-white shadow-[0_0_10px_rgba(57,255,20,0.15)]'
+                        ? 'bg-[#39FF14]/15 border-[#39FF14] text-[#39FF14] shadow-[0_0_10px_rgba(57,255,20,0.15)]'
                         : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
                     }`}
                   >
@@ -166,11 +168,11 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
                   onClick={() => setBias(opt.value)}
                   className={`p-3 rounded-xl border text-center transition-all ${
                     bias === opt.value
-                      ? `${opt.color} font-bold ring-1 ring-white/20`
+                      ? 'bg-[#39FF14]/15 border-[#39FF14] text-[#39FF14] font-bold shadow-[0_0_10px_rgba(57,255,20,0.2)]'
                       : 'bg-black/40 border-white/10 text-neutral-400 hover:border-white/20'
                   }`}
                 >
-                  <div className="text-sm">{opt.label}</div>
+                  <div className="text-xs">{opt.label}</div>
                 </button>
               ))}
             </div>
@@ -178,64 +180,64 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
         </CardContent>
       </Card>
 
-      {/* 2. Key Levels & Context */}
+      {/* 2. Key Levels: Volume Profile, Session Extremes, VWAP */}
       <Card className="bg-[#141414] border-white/10">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#39FF14] uppercase tracking-wider">
             <Layers className="w-4 h-4" />
-            <span>Étape 2 — Niveaux Clés & Analyse</span>
+            <span>Étape 2 — Niveaux Clés & Cartographie Institutionnelle</span>
           </div>
-          <CardTitle className="text-lg text-white">Cartographie du Marché</CardTitle>
+          <CardTitle className="text-lg text-white">Volume Profile, Session High/Low & VWAP</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <label className="text-xs font-medium text-neutral-300 block mb-1.5">
-              Niveaux Clés (PDH/PDL, Open, VAH/VAL, FVG, Liquidity Pools)
+              Niveaux Volume Profile Previous Day & Hauts/Bas (VAH, VAL, POC, Asian High/Low, London High/Low)
             </label>
             <Input
               name="key_levels"
               defaultValue={initialData?.key_levels || ''}
-              placeholder="Ex: 21450 (PDH), 21320 (Asia High), 21200 (Support HTF)"
-              className="bg-black/50 border-white/10 text-white font-mono"
+              placeholder="Ex: VAH 21450, POC 21380, VAL 21290 | Asian High 21420, Asian Low 21310"
+              className="bg-black/50 border-white/10 text-white font-mono text-xs"
             />
           </div>
 
           <div>
             <label className="text-xs font-medium text-neutral-300 block mb-1.5">
-              Analyse & Contexte Macro / Structure HTF
+              Contexte VWAP & Structure de Marché
             </label>
             <Textarea
               name="market_context"
               defaultValue={initialData?.market_context || ''}
-              placeholder="Quel est le narratif ? Tendance HTF, annonces économiques attendues..."
+              placeholder="Ex: Prix au-dessus du VWAP de session, compression sous la VAH précédente, recherche d'un rejet vers le POC..."
               rows={3}
-              className="bg-black/50 border-white/10 text-white resize-none"
+              className="bg-black/50 border-white/10 text-white text-xs resize-none"
             />
           </div>
         </CardContent>
       </Card>
 
-      {/* 3. Scenarios & Conditions */}
+      {/* 3. Scenarios & Conditions: Inefficiencies, IFVG, BPR, FVG */}
       <Card className="bg-[#141414] border-white/10">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#39FF14] uppercase tracking-wider">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Étape 3 — Scénarios & Exécution</span>
+            <Zap className="w-4 h-4" />
+            <span>Étape 3 — Scénarios & Déclencheurs (IFVG / BPR / FVG)</span>
           </div>
-          <CardTitle className="text-lg text-white">Plan de Trading Structuré</CardTitle>
+          <CardTitle className="text-lg text-white">Plan de Trading & Signaux de Confirmation</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="text-xs font-medium text-emerald-400 block mb-1.5">
+              <label className="text-xs font-medium text-[#39FF14] block mb-1.5">
                 Scénario Principal (A)
               </label>
               <Textarea
                 name="primary_scenario"
                 defaultValue={initialData?.primary_scenario || ''}
-                placeholder="Ex: Sweep de l'Asia Low à l'open NY puis réintégration haussière vers PDH..."
+                placeholder="Ex: Rejet sur Asian Low + confluence VWAP -> inversion de tendance et reprise haussière vers la VAH..."
                 rows={3}
-                className="bg-black/50 border-emerald-500/20 text-white resize-none"
+                className="bg-black/50 border-[#39FF14]/30 text-white text-xs resize-none"
               />
             </div>
 
@@ -246,9 +248,9 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
               <Textarea
                 name="alternative_scenario"
                 defaultValue={initialData?.alternative_scenario || ''}
-                placeholder="Ex: Cassure nette de 21200 avec volume -> continuation baissière..."
+                placeholder="Ex: Breakout franc sous la VAL avec inefficience confirmée -> continuation baissière..."
                 rows={3}
-                className="bg-black/50 border-amber-500/20 text-white resize-none"
+                className="bg-black/50 border-amber-500/30 text-white text-xs resize-none"
               />
             </div>
           </div>
@@ -256,13 +258,13 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-neutral-300 block mb-1.5">
-                Conditions d'Entrée
+                Conditions d'Entrée & Trigger (Inversion, Inefficience, IFVG / BPR / FVG)
               </label>
               <Input
                 name="execution_conditions"
                 defaultValue={initialData?.execution_conditions || ''}
-                placeholder="Ex: Clôture 1M au-dessus du FVG + validation delta"
-                className="bg-black/50 border-white/10 text-white"
+                placeholder="Ex: Inversion validée sur indicateur + réaction sur IFVG / BPR en confluence VWAP"
+                className="bg-black/50 border-white/10 text-white text-xs"
               />
             </div>
 
@@ -273,46 +275,46 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
               <Input
                 name="invalidation_conditions"
                 defaultValue={initialData?.invalidation_conditions || ''}
-                placeholder="Ex: Rejet violent sous le VWAP ou réintégration opposée"
-                className="bg-black/50 border-white/10 text-white"
+                placeholder="Ex: Clôture opposée à travers le BPR ou perte nette du VWAP de session"
+                className="bg-black/50 border-white/10 text-white text-xs"
               />
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* 4. Risk & Mindset */}
+      {/* 4. Risk & Discipline */}
       <Card className="bg-[#141414] border-white/10">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2 text-xs font-semibold text-[#39FF14] uppercase tracking-wider">
-            <Brain className="w-4 h-4" />
-            <span>Étape 4 — Risk & Psychologie</span>
+            <Shield className="w-4 h-4" />
+            <span>Étape 4 — Risk Management en TICKS & Discipline</span>
           </div>
-          <CardTitle className="text-lg text-white">Discipline & État Mental</CardTitle>
+          <CardTitle className="text-lg text-white">Cadre de Risque & Posture</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="text-xs font-medium text-neutral-300 block mb-1.5">
-                Gestion du Risque (Max Loss / Max Trades)
+                Règles de Risque (SL max en Ticks / Risque $ / Nombre max de trades)
               </label>
               <Input
                 name="risk_management"
                 defaultValue={initialData?.risk_management || ''}
-                placeholder="Ex: Max 2 trades / Risque $300 max par trade"
-                className="bg-black/50 border-white/10 text-white"
+                placeholder="Ex: SL max 80 ticks (20 pts) • Risque $250 max • 2 trades max"
+                className="bg-black/50 border-white/10 text-white text-xs"
               />
             </div>
 
             <div>
               <label className="text-xs font-medium text-neutral-300 block mb-1.5">
-                Mindset / Niveau d'énergie
+                Mindset & État de Concentration
               </label>
               <Input
                 name="mindset"
                 defaultValue={initialData?.mindset || ''}
-                placeholder="Ex: Calme, concentré, patient, pas de FOMO"
-                className="bg-black/50 border-white/10 text-white"
+                placeholder="Ex: Patient, exécution chirurgicale, zéro précipitation"
+                className="bg-black/50 border-white/10 text-white text-xs"
               />
             </div>
           </div>
@@ -327,7 +329,7 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
           </div>
           <CardTitle className="text-xl text-white font-extrabold">Décision Finale</CardTitle>
           <CardDescription className="text-xs text-neutral-400">
-            Formalisez votre posture avant d'ouvrir votre plateforme d'exécution
+            Formalisez votre posture avant d'ouvrir la plateforme d'exécution
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 pt-0">
@@ -339,12 +341,12 @@ export function WorkspaceForm({ initialData }: WorkspaceFormProps) {
                 onClick={() => setDecision(dec.value)}
                 className={`p-4 rounded-xl border text-center transition-all ${
                   decision === dec.value
-                    ? `${dec.color} font-black shadow-lg scale-[1.02]`
+                    ? 'bg-[#39FF14]/15 border-[#39FF14] text-[#39FF14] font-black shadow-[0_0_15px_rgba(57,255,20,0.25)] scale-[1.02]'
                     : 'bg-[#141414] border-white/10 text-neutral-400 hover:border-white/20'
                 }`}
               >
                 <div className="text-base tracking-wide font-black">{dec.value}</div>
-                <div className="text-[11px] mt-1 opacity-80">{dec.label.split('—')[1]}</div>
+                <div className="text-[11px] mt-1 opacity-80">{dec.desc}</div>
               </button>
             ))}
           </div>
