@@ -48,9 +48,9 @@ export function TradingHubTabs({ trades, stats, accounts = [], protocolData }: T
       <PropFirmSummaryWidget accounts={accounts} />
 
       {/* Tab Navigation Pill Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
-        <div className="w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
-          <div className="inline-flex items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-white/10 shrink-0 min-w-full sm:min-w-0">
+      <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4 border-b border-white/10 pb-4">
+        <div className="w-full xl:flex-1">
+          <div className="flex flex-wrap items-center gap-1.5 bg-black/60 p-1 rounded-xl border border-white/10">
             <button
               type="button"
               onClick={() => setActiveTab('journal')}
@@ -119,7 +119,7 @@ export function TradingHubTabs({ trades, stats, accounts = [], protocolData }: T
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center flex-wrap gap-2.5">
+        <div className="flex items-center flex-wrap xl:flex-nowrap gap-2.5 shrink-0">
           {/* Institutional PDF Audit Generator Modal */}
           <InstitutionalAuditModal trades={trades} accounts={accounts} />
 

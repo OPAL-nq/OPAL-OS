@@ -36,6 +36,11 @@ export function DailyProtocolWidget({
   const [streak, setStreak] = useState<UserStreak>(initialStreak);
   const [isUpdating, setIsUpdating] = useState(false);
   const [isBadgesModalOpen, setIsBadgesModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const completedStepsCount = [
     protocol.pre_market_done,
@@ -89,11 +94,13 @@ export function DailyProtocolWidget({
     }
   };
 
-  const todayFormatted = new Date().toLocaleDateString('fr-FR', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  });
+  const todayFormatted = mounted
+    ? new Date().toLocaleDateString('fr-FR', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+      })
+    : '';
 
   const steps = [
     {
