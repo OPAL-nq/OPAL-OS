@@ -23,8 +23,6 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import type { Profile, Module, Lesson, Trade } from '@/types';
-import { OnboardingModal } from '@/components/onboarding/onboarding-modal';
-import { DashboardOnboardingSection } from '@/components/onboarding/dashboard-onboarding-section';
 import { getTodayProtocol } from '@/app/actions/protocol';
 import { DailyProtocolWidget } from '@/components/trading/protocol/daily-protocol-widget';
 
@@ -133,16 +131,6 @@ export default async function DashboardPage() {
     lastTrade = lastTradeRes.data || null;
   }
 
-  // Check Prop Firm Guardian accounts
-  let hasConfiguredPropFirm = false;
-  if (user) {
-    const { count } = await supabase
-      .from('prop_firm_accounts')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.id);
-    hasConfiguredPropFirm = (count || 0) > 0;
-  }
-
   // ----------------------------------------------------
   // 3. Dynamic Live Sessions Query
   // ----------------------------------------------------
@@ -234,26 +222,8 @@ export default async function DashboardPage() {
   // ----------------------------------------------------
   const todayProtocolData = await getTodayProtocol();
 
-  const hasCompletedAcademyLesson = completedLessons > 0;
-  const hasLoggedTrade = totalTrades > 0;
-  const hasValidatedProtocol =
-    Boolean(todayProtocolData?.protocol?.is_completed ||
-    todayProtocolData?.protocol?.pre_market_done ||
-    todayProtocolData?.protocol?.no_trade_day ||
-    todayProtocolData?.recentDays?.some((d) => d.is_completed || d.no_trade_day || d.pre_market_done));
-
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">
-      {/* Onboarding Modal for First-Time Users */}
-      {user && (
-        <OnboardingModal
-          userId={user.id}
-          initialFullName={profile?.full_name}
-          initialAvatarUrl={profile?.avatar_url}
-          plan={profile?.plan}
-        />
-      )}
-
       {/* Welcome Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-[#141414] via-[#141414] to-[#1e1e1e] border border-white/10 p-6 md:p-8">
         <div className="absolute top-0 right-0 -mt-8 -mr-8 w-64 h-64 bg-[#39FF14]/5 rounded-full blur-3xl pointer-events-none" />
@@ -285,14 +255,6 @@ export default async function DashboardPage() {
           </div>
         </div>
       </div>
-
-      {/* Onboarding Quickstart Checklist & Guide Section */}
-      <DashboardOnboardingSection
-        hasCompletedAcademyLesson={hasCompletedAcademyLesson}
-        hasConfiguredPropFirm={hasConfiguredPropFirm}
-        hasLoggedTrade={hasLoggedTrade}
-        hasValidatedProtocol={hasValidatedProtocol}
-      />
 
       {/* Daily Protocol & Streaks Interactive Widget */}
       <DailyProtocolWidget

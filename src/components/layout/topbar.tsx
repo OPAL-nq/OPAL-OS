@@ -4,10 +4,9 @@ import React, { useState } from 'react';
 import { UserMenu } from './user-menu';
 import { NotificationBell } from '@/components/notifications/notification-bell';
 import { MobileNav } from './mobile-nav';
-import { Menu, Compass } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import Link from 'next/link';
 import type { Profile } from '@/types';
-import { PlatformTourModal } from '@/components/onboarding/platform-tour-modal';
 
 interface TopbarProps {
   profile: Profile | null;
@@ -16,7 +15,6 @@ interface TopbarProps {
 
 export function Topbar({ profile, title }: TopbarProps) {
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
-  const [isTourOpen, setIsTourOpen] = useState(false);
 
   return (
     <>
@@ -51,29 +49,12 @@ export function Topbar({ profile, title }: TopbarProps) {
           </h1>
         </div>
 
-        {/* Right: Tour button, Notifications & Profile Menu */}
-        <div className="flex items-center gap-2 sm:gap-2.5">
-          {/* Quick Guide Tour Trigger */}
-          <button
-            type="button"
-            onClick={() => setIsTourOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white border border-white/10 transition-all text-xs font-semibold"
-            title="Lancer la visite guidée d'OPAL OS"
-          >
-            <Compass className="w-4 h-4 text-[#39FF14]" />
-            <span className="hidden sm:inline">Guide OS</span>
-          </button>
-
+        {/* Right: Notifications & Profile Menu */}
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <NotificationBell />
           <UserMenu profile={profile} />
         </div>
       </header>
-
-      {/* Global Platform Tour Modal */}
-      <PlatformTourModal
-        isOpen={isTourOpen}
-        onClose={() => setIsTourOpen(false)}
-      />
 
       {/* Mobile Slide-over Drawer */}
       <MobileNav
