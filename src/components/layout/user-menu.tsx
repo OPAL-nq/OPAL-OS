@@ -11,10 +11,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, User as UserIcon, Shield, CreditCard } from 'lucide-react';
+import { LogOut, User as UserIcon, Shield, CreditCard, Compass } from 'lucide-react';
 import Link from 'next/link';
 import type { Profile } from '@/types';
 import { SubscriptionModal } from '@/components/billing/subscription-modal';
+import { PlatformTourModal } from '@/components/onboarding/platform-tour-modal';
 
 interface UserMenuProps {
   profile: Profile | null;
@@ -22,6 +23,7 @@ interface UserMenuProps {
 
 export function UserMenu({ profile }: UserMenuProps) {
   const [isBillingModalOpen, setIsBillingModalOpen] = useState(false);
+  const [isTourModalOpen, setIsTourModalOpen] = useState(false);
 
   const initials = profile?.full_name
     ? profile.full_name
@@ -65,13 +67,22 @@ export function UserMenu({ profile }: UserMenuProps) {
 
           <DropdownMenuSeparator className="bg-white/5 my-1" />
 
+          {/* Guide & Walkthrough Trigger */}
+          <DropdownMenuItem
+            onClick={() => setIsTourModalOpen(true)}
+            className="flex items-center gap-2 px-2 py-1.5 text-xs text-white hover:bg-white/5 rounded-md cursor-pointer"
+          >
+            <Compass className="w-3.5 h-3.5 text-[#39FF14]" />
+            <span>Guide de la plateforme</span>
+          </DropdownMenuItem>
+
           {/* Subscription & Billing Trigger */}
           <DropdownMenuItem
             onClick={() => setIsBillingModalOpen(true)}
             className="flex items-center justify-between px-2 py-1.5 text-xs text-white hover:bg-white/5 rounded-md cursor-pointer"
           >
             <div className="flex items-center gap-2">
-              <CreditCard className="w-3.5 h-3.5 text-[#39FF14]" />
+              <CreditCard className="w-3.5 h-3.5 text-neutral-400" />
               <span>Abonnement & Facturation</span>
             </div>
             <span className="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-white/10 text-[#39FF14]">
@@ -111,6 +122,12 @@ export function UserMenu({ profile }: UserMenuProps) {
       <SubscriptionModal
         open={isBillingModalOpen}
         onOpenChange={setIsBillingModalOpen}
+      />
+
+      {/* Guide Tour Modal */}
+      <PlatformTourModal
+        isOpen={isTourModalOpen}
+        onClose={() => setIsTourModalOpen(false)}
       />
     </>
   );
