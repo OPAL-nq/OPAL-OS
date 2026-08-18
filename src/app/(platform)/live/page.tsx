@@ -6,7 +6,7 @@ import { LiveCountdown } from '@/components/live/live-countdown';
 import { LiveStatusBadge } from '@/components/live/live-status-badge';
 import { ReplayCard } from '@/components/live/replay-card';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import {
   Radio,
   Calendar,
@@ -15,11 +15,13 @@ import {
   Video,
   PlaySquare,
   Sparkles,
-  ShieldAlert,
+  ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
+
+const DEFAULT_DISCORD_LIVE_URL = 'https://discord.gg/T2qKhSgQS';
 
 export default async function LiveHubPage() {
   const supabase = await createClient();
@@ -55,7 +57,9 @@ export default async function LiveHubPage() {
   const nextLive = activeLive || upcomingLives[0] || null;
 
   // Other upcoming lives excluding the next one
-  const remainingUpcoming = allLives.filter((l) => l.id !== nextLive?.id && l.status !== 'ended' && l.status !== 'cancelled');
+  const remainingUpcoming = allLives.filter(
+    (l) => l.id !== nextLive?.id && l.status !== 'ended' && l.status !== 'cancelled'
+  );
 
   // Query recent replays
   let replaysQuery = supabase
@@ -71,6 +75,8 @@ export default async function LiveHubPage() {
   const { data: replaysData } = await replaysQuery;
   const recentReplays = (replaysData || []) as LiveReplay[];
 
+  const liveDiscordUrl = nextLive?.stream_url || DEFAULT_DISCORD_LIVE_URL;
+
   return (
     <div className="space-y-10 max-w-7xl mx-auto pb-16">
       {/* Top Header */}
@@ -78,13 +84,13 @@ export default async function LiveHubPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-red-500 uppercase tracking-wider mb-1">
             <Radio className="w-4 h-4 animate-pulse" />
-            <span>OPAL Live Hub</span>
+            <span>OPAL Live Hub • Discord</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Sessions en Direct & Masterclasses
           </h1>
           <p className="text-sm text-neutral-400 mt-1">
-            Participez aux sessions de trading en temps réel avec Maxym et retrouvez les replays.
+            Rejoignez les sessions de live trading sur le salon conférence Discord et retrouvez les replays archivés.
           </p>
         </div>
 
@@ -114,7 +120,7 @@ export default async function LiveHubPage() {
           className={`relative overflow-hidden border ${
             nextLive.status === 'live'
               ? 'bg-gradient-to-br from-red-950/40 via-[#141414] to-black border-red-500/50 shadow-[0_0_40px_rgba(239,68,68,0.2)]'
-              : 'bg-gradient-to-br from-emerald-950/20 via-[#141414] to-black border-[#39FF14]/30 shadow-[0_0_30px_rgba(57,255,20,0.1)]'
+              : 'bg-gradient-to-br from-[#5865F2]/10 via-[#141414] to-black border-[#5865F2]/30 shadow-[0_0_30px_rgba(88,101,242,0.15)]'
           }`}
         >
           <div className="p-6 sm:p-8 lg:p-10 space-y-6">
@@ -165,28 +171,35 @@ export default async function LiveHubPage() {
                 />
               </div>
 
-              <div>
-                <Link href={`/live/${nextLive.id}`}>
+              <div className="flex flex-wrap items-center gap-3">
+                <a
+                  href={liveDiscordUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <Button
                     size="lg"
-                    className={`font-black text-sm px-8 h-12 shadow-2xl transition-all ${
+                    className={`font-black text-sm px-6 h-12 rounded-xl shadow-2xl transition-all ${
                       nextLive.status === 'live'
                         ? 'bg-red-500 text-white hover:bg-red-600 shadow-[0_0_25px_rgba(239,68,68,0.4)] animate-pulse'
-                        : 'bg-[#39FF14] text-black hover:bg-[#32e012] shadow-[0_0_20px_rgba(57,255,20,0.3)]'
+                        : 'bg-[#5865F2] hover:bg-[#4752c4] text-white shadow-[0_0_20px_rgba(88,101,242,0.3)]'
                     }`}
                   >
-                    {nextLive.status === 'live' ? (
-                      <>
-                        <Radio className="w-4 h-4 mr-2" />
-                        Rejoindre le Live en cours
-                      </>
-                    ) : (
-                      <>
-                        <Video className="w-4 h-4 mr-2" />
-                        Accéder à la salle de Live
-                      </>
-                    )}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <Radio className="w-4 h-4 mr-2" />
+                    <span>Rejoindre sur Discord</span>
+                    <ExternalLink className="w-4 h-4 ml-2 opacity-80" />
+                  </Button>
+                </a>
+
+                <Link href={`/live/${nextLive.id}`}>
+                  <Button
+                    variant="outline"
+                    size="lg"
+                    className="border-white/15 hover:bg-white/5 text-neutral-200 text-xs font-bold h-12 px-5 rounded-xl"
+                  >
+                    <Video className="w-4 h-4 mr-2" />
+                    Détails de la session
+                    <ArrowRight className="w-3.5 h-3.5 ml-2 text-neutral-400" />
                   </Button>
                 </Link>
               </div>
@@ -201,7 +214,7 @@ export default async function LiveHubPage() {
           <div className="space-y-1">
             <h3 className="text-base font-bold text-white">Aucun Live programmé pour le moment</h3>
             <p className="text-xs text-neutral-400 max-w-md mx-auto">
-              L'équipe OPAL publiera prochainement les dates des prochaines sessions de live trading et masterclasses.
+              Maxym publiera prochainement les dates des prochaines sessions de live trading et masterclasses sur Discord.
             </p>
           </div>
         </Card>

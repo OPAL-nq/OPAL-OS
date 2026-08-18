@@ -233,7 +233,7 @@ export function AdminLiveManager({ lives, replays }: AdminLiveManagerProps) {
                 setLiveDesc('');
                 setLiveType('live_trading');
                 setLiveScheduledAt(new Date().toISOString().slice(0, 16));
-                setLiveStreamUrl('');
+                setLiveStreamUrl('https://discord.gg/T2qKhSgQS');
                 setLiveStatus('scheduled');
                 setLivePublished(true);
                 setShowLiveForm(true);
@@ -336,13 +336,16 @@ export function AdminLiveManager({ lives, replays }: AdminLiveManagerProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-xs font-semibold text-neutral-300">URL du Stream (YouTube Live / externe)</label>
+                    <label className="text-xs font-semibold text-neutral-300">Lien Discord / Salon Conférence</label>
                     <Input
                       value={liveStreamUrl}
                       onChange={(e) => setLiveStreamUrl(e.target.value)}
-                      placeholder="https://www.youtube.com/watch?v=..."
+                      placeholder="https://discord.gg/T2qKhSgQS"
                       className="bg-black/60 border-white/10 text-white text-xs"
                     />
+                    <p className="text-[10px] text-neutral-500">
+                      Par défaut : https://discord.gg/T2qKhSgQS (Salon Live Discord)
+                    </p>
                   </div>
                 </div>
 
