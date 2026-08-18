@@ -19,6 +19,9 @@ export interface BatchTradeInput {
   pnl_r: number;
   screenshot_url?: string | null;
   plan_followed: boolean;
+  emotional_state?: 'calm' | 'fomo' | 'revenge' | 'fatigued' | null;
+  plan_compliance?: 'full' | 'minor_deviation' | 'off_plan' | null;
+  stop_discipline?: 'respected' | 'moved_early' | 'widened_or_removed' | null;
   mistakes?: string | null;
   notes?: string | null;
   market_context?: string | null;
@@ -46,6 +49,9 @@ export async function createTrade(formData: FormData): Promise<void> {
   const pnl_r = formData.get('pnl_r') ? Number(formData.get('pnl_r')) : 0;
   const screenshot_url = formData.get('screenshot_url')?.toString() || null;
   const plan_followed = formData.get('plan_followed') === 'true';
+  const emotional_state = formData.get('emotional_state')?.toString() || null;
+  const plan_compliance = formData.get('plan_compliance')?.toString() || (plan_followed ? 'full' : 'off_plan');
+  const stop_discipline = formData.get('stop_discipline')?.toString() || 'respected';
   const mistakes = formData.get('mistakes')?.toString() || null;
   const notes = formData.get('notes')?.toString() || null;
   const market_context = formData.get('market_context')?.toString() || null;
@@ -68,6 +74,9 @@ export async function createTrade(formData: FormData): Promise<void> {
       pnl_r,
       screenshot_url,
       plan_followed,
+      emotional_state,
+      plan_compliance,
+      stop_discipline,
       mistakes,
       notes,
       market_context,
@@ -110,6 +119,9 @@ export async function batchCreateTrades(trades: BatchTradeInput[]): Promise<{ su
     pnl_r: t.pnl_r || 0,
     screenshot_url: t.screenshot_url ?? null,
     plan_followed: t.plan_followed ?? true,
+    emotional_state: t.emotional_state ?? null,
+    plan_compliance: t.plan_compliance ?? (t.plan_followed !== false ? 'full' : 'off_plan'),
+    stop_discipline: t.stop_discipline ?? 'respected',
     mistakes: t.mistakes ?? null,
     notes: t.notes ?? null,
     market_context: t.market_context ?? null,

@@ -237,15 +237,22 @@ export function TradeList({ trades }: TradeListProps) {
                         </span>
                       </td>
                       <td className="p-3.5 text-center">
-                        {trade.plan_followed ? (
-                          <span className="inline-flex items-center text-emerald-400" title="Plan respecté">
-                            <CheckCircle2 className="w-4 h-4" />
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center text-amber-400" title="Plan non respecté">
-                            <XCircle className="w-4 h-4" />
-                          </span>
-                        )}
+                        <div className="flex items-center justify-center gap-1.5">
+                          {trade.plan_followed ? (
+                            <span className="inline-flex items-center text-emerald-400" title="Plan respecté">
+                              <CheckCircle2 className="w-4 h-4" />
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center text-amber-400" title="Plan non respecté">
+                              <XCircle className="w-4 h-4" />
+                            </span>
+                          )}
+
+                          {trade.emotional_state === 'calm' && <span title="Calme & Focus">🧘</span>}
+                          {trade.emotional_state === 'fomo' && <span title="FOMO / Impatient">⚡</span>}
+                          {trade.emotional_state === 'revenge' && <span title="Revenge / Frustration">😡</span>}
+                          {trade.emotional_state === 'fatigued' && <span title="Fatigue">🥱</span>}
+                        </div>
                       </td>
                       <td className="p-3.5 text-center">
                         {trade.screenshot_url ? (
@@ -345,6 +352,17 @@ export function TradeList({ trades }: TradeListProps) {
                     <div>P&L : <span className={trade.pnl_dollars >= 0 ? 'text-[#39FF14]' : 'text-red-400'}>${trade.pnl_dollars.toFixed(0)}</span></div>
                     <div>Risque : <span className="text-neutral-200">${trade.risk_dollars.toFixed(0)}</span></div>
                     <div>Plan respecté : <span className={trade.plan_followed ? 'text-emerald-400' : 'text-amber-400'}>{trade.plan_followed ? 'Oui' : 'Non'}</span></div>
+                    {trade.emotional_state && (
+                      <div className="col-span-2">
+                        État mental :{' '}
+                        <span className="text-white">
+                          {trade.emotional_state === 'calm' && '🧘 Calme & Focus'}
+                          {trade.emotional_state === 'fomo' && '⚡ FOMO / Impatient'}
+                          {trade.emotional_state === 'revenge' && '😡 Revenge / Frustré'}
+                          {trade.emotional_state === 'fatigued' && '🥱 Fatigué'}
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-white/5">

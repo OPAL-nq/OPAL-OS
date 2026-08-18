@@ -39,6 +39,9 @@ export interface Trade {
   pnl_r: number;
   screenshot_url?: string | null;
   plan_followed: boolean;
+  emotional_state?: 'calm' | 'fomo' | 'revenge' | 'fatigued' | null;
+  plan_compliance?: 'full' | 'minor_deviation' | 'off_plan' | null;
+  stop_discipline?: 'respected' | 'moved_early' | 'widened_or_removed' | null;
   mistakes?: string | null;
   notes?: string | null;
   market_context?: string | null;

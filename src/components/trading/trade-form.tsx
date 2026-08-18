@@ -31,6 +31,9 @@ export function TradeForm() {
   const [pnlDollars, setPnlDollars] = useState<number>(600);
   const [pnlR, setPnlR] = useState<number>(2);
   const [planFollowed, setPlanFollowed] = useState<boolean>(true);
+  const [emotionalState, setEmotionalState] = useState<'calm' | 'fomo' | 'revenge' | 'fatigued'>('calm');
+  const [planCompliance, setPlanCompliance] = useState<'full' | 'minor_deviation' | 'off_plan'>('full');
+  const [stopDiscipline, setStopDiscipline] = useState<'respected' | 'moved_early' | 'widened_or_removed'>('respected');
   const [screenshotUrl, setScreenshotUrl] = useState<string>('');
   const [loading, setLoading] = useState(false);
 
@@ -60,7 +63,10 @@ export function TradeForm() {
     formData.set('risk_dollars', riskDollars.toString());
     formData.set('pnl_dollars', pnlDollars.toString());
     formData.set('pnl_r', pnlR.toString());
-    formData.set('plan_followed', planFollowed ? 'true' : 'false');
+    formData.set('plan_followed', (planCompliance === 'full').toString());
+    formData.set('emotional_state', emotionalState);
+    formData.set('plan_compliance', planCompliance);
+    formData.set('stop_discipline', stopDiscipline);
     formData.set('screenshot_url', screenshotUrl);
     if (stopLossTicks) formData.set('stop_loss_ticks', stopLossTicks);
     if (takeProfitTicks) formData.set('take_profit_ticks', takeProfitTicks);
@@ -320,37 +326,167 @@ export function TradeForm() {
             </div>
           </div>
 
-          {/* 5. Plan Discipline */}
-          <div>
-            <label className="text-xs font-semibold text-neutral-300 block mb-1.5">
-              Respect du Plan de Trading
-            </label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setPlanFollowed(true)}
-                className={`py-3 px-4 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                  planFollowed
-                    ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.15)]'
-                    : 'bg-black/40 border-white/10 text-neutral-400'
-                }`}
-              >
-                <CheckCircle2 className="w-4 h-4" />
-                Plan 100% Respecté (Oui)
-              </button>
+          {/* 5. Psychologie & Discipline de Session (Tagging en 3 secondes) */}
+          <div className="p-4 rounded-xl bg-black/60 border border-white/10 space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-neutral-200 uppercase tracking-wider">
+                Psychologie & Rigueur d'Exécution
+              </span>
+              <span className="text-[10px] text-neutral-500 font-mono">Tagging instantané</span>
+            </div>
 
-              <button
-                type="button"
-                onClick={() => setPlanFollowed(false)}
-                className={`py-3 px-4 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 transition-all ${
-                  !planFollowed
-                    ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.15)]'
-                    : 'bg-black/40 border-white/10 text-neutral-400'
-                }`}
-              >
-                <XCircle className="w-4 h-4" />
-                Déviation du Plan (Non)
-              </button>
+            {/* A. Emotional Mindset */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-neutral-300 block">
+                État d'esprit & Émotion au moment d'entrer
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setEmotionalState('calm')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    emotionalState === 'calm'
+                      ? 'bg-[#39FF14]/15 border-[#39FF14] text-[#39FF14] shadow-[0_0_12px_rgba(57,255,20,0.2)]'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span>🧘</span>
+                  <span>Calme & Focus</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEmotionalState('fomo')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    emotionalState === 'fomo'
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span>⚡</span>
+                  <span>FOMO / Impatient</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEmotionalState('revenge')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    emotionalState === 'revenge'
+                      ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span>😡</span>
+                  <span>Revenge / Frustré</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setEmotionalState('fatigued')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    emotionalState === 'fatigued'
+                      ? 'bg-purple-500/20 border-purple-500 text-purple-400 shadow-[0_0_12px_rgba(168,85,247,0.2)]'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span>🥱</span>
+                  <span>Fatigué / Distrait</span>
+                </button>
+              </div>
+            </div>
+
+            {/* B. Plan Compliance */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-neutral-300 block">
+                Conformité au Plan & Ruleset
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setPlanCompliance('full')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    planCompliance === 'full'
+                      ? 'bg-emerald-500/20 border-emerald-500 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.2)]'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5 shrink-0" />
+                  <span>100% sur Plan (A+ Setup)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPlanCompliance('minor_deviation')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    planCompliance === 'minor_deviation'
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span>🟡</span>
+                  <span>Déviation Mineure</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setPlanCompliance('off_plan')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    planCompliance === 'off_plan'
+                      ? 'bg-red-500/20 border-red-500 text-red-400 shadow-[0_0_12px_rgba(239,68,68,0.2)]'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <XCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>Hors Plan / Impulsif</span>
+                </button>
+              </div>
+            </div>
+
+            {/* C. Stop Loss Discipline */}
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-neutral-300 block">
+                Gestion du Stop Loss
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStopDiscipline('respected')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    stopDiscipline === 'respected'
+                      ? 'bg-[#39FF14]/15 border-[#39FF14] text-[#39FF14]'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span>✅</span>
+                  <span>100% Respecté (Intact)</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStopDiscipline('moved_early')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    stopDiscipline === 'moved_early'
+                      ? 'bg-amber-500/20 border-amber-500 text-amber-400'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span>⚠️</span>
+                  <span>Déplacé Trop Tôt / BE</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setStopDiscipline('widened_or_removed')}
+                  className={`py-2 px-3 rounded-lg border text-xs font-bold transition-all text-left flex items-center gap-2 ${
+                    stopDiscipline === 'widened_or_removed'
+                      ? 'bg-red-500/20 border-red-500 text-red-400'
+                      : 'bg-black/40 border-white/10 text-neutral-400 hover:text-white'
+                  }`}
+                >
+                  <span>❌</span>
+                  <span>Élargi ou Supprimé</span>
+                </button>
+              </div>
             </div>
           </div>
 

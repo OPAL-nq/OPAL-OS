@@ -133,20 +133,41 @@ export default async function TradeDetailPage({ params }: Props) {
             </div>
           </div>
 
-          {/* Plan Discipline Status */}
-          <div className="p-4 rounded-xl bg-black/60 border border-white/10 flex items-center justify-between">
-            <span className="text-xs text-neutral-300">Discipline & Plan de Trading :</span>
-            {trade.plan_followed ? (
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
-                <CheckCircle2 className="w-4 h-4" />
-                Plan 100% Respecté
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
-                <XCircle className="w-4 h-4" />
-                Déviation du Plan
-              </span>
-            )}
+          {/* Plan Discipline & Psychology Status */}
+          <div className="p-4 rounded-xl bg-black/60 border border-white/10 space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs text-neutral-300 font-semibold">Diagnostic & Discipline d'Exécution :</span>
+              <div className="flex flex-wrap items-center gap-2">
+                {trade.emotional_state && (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-200">
+                    {trade.emotional_state === 'calm' && '🧘 Calme & Focus'}
+                    {trade.emotional_state === 'fomo' && '⚡ FOMO / Impatient'}
+                    {trade.emotional_state === 'revenge' && '😡 Revenge / Frustré'}
+                    {trade.emotional_state === 'fatigued' && '🥱 Fatigué'}
+                  </span>
+                )}
+
+                {trade.stop_discipline && (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-neutral-200">
+                    {trade.stop_discipline === 'respected' && '✅ Stop Respecté'}
+                    {trade.stop_discipline === 'moved_early' && '⚠️ Stop Déplacé Tôt'}
+                    {trade.stop_discipline === 'widened_or_removed' && '❌ Stop Élargi/Supprimé'}
+                  </span>
+                )}
+
+                {trade.plan_followed ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-full">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    Plan 100% Respecté
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1 rounded-full">
+                    <XCircle className="w-3.5 h-3.5" />
+                    Déviation du Plan
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Notes & Mistakes */}

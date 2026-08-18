@@ -199,24 +199,49 @@ export function CsvTradeImporter() {
     setErrorMessage(null);
 
     try {
-      const payload: BatchTradeInput[] = selectedTrades.map((t) => ({
-        trade_date: t.trade_date,
-        instrument: t.instrument,
-        direction: t.direction,
-        entry_price: t.entry_price,
-        stop_loss: t.stop_loss ?? null,
-        take_profit: t.take_profit ?? null,
-        stop_loss_ticks: t.stop_loss_ticks ?? null,
-        take_profit_ticks: t.take_profit_ticks ?? null,
-        risk_dollars: t.risk_dollars,
-        pnl_dollars: t.pnl_dollars,
-        pnl_r: t.pnl_r,
-        screenshot_url: null,
-        plan_followed: t.plan_followed,
-        mistakes: t.mindset ? `Psychologie : ${t.mindset}` : null,
-        notes: t.notes || null,
-        market_context: `Session : ${t.session_tag || 'NY AM'} | Setup : ${t.technique_tag || 'Volume Profile'}`,
-      }));
+      const payload: BatchTradeInput[] = selectedTrades.map((t) => {
+        let emotional_state: 'calm' | 'fomo' | 'revenge' | 'fatigued' = 'calm';
+        let plan_compliance: 'full' | 'minor_deviation' | 'off_plan' = t.plan_followed ? 'full' : 'off_plan';
+        let stop_discipline: 'respected' | 'moved_early' | 'widened_or_removed' = 'respected';
+
+        if (t.mindset) {
+          const m = t.mindset.toLowerCase();
+          if (m.includes('fomo')) {
+            emotional_state = 'fomo';
+            plan_compliance = 'minor_deviation';
+          } else if (m.includes('revanche') || m.includes('tilt')) {
+            emotional_state = 'revenge';
+            plan_compliance = 'off_plan';
+          } else if (m.includes('overtrading') || m.includes('fatigue')) {
+            emotional_state = 'fatigued';
+            plan_compliance = 'off_plan';
+          } else if (m.includes('sortie anticipée') || m.includes('stress')) {
+            stop_discipline = 'moved_early';
+          }
+        }
+
+        return {
+          trade_date: t.trade_date,
+          instrument: t.instrument,
+          direction: t.direction,
+          entry_price: t.entry_price,
+          stop_loss: t.stop_loss ?? null,
+          take_profit: t.take_profit ?? null,
+          stop_loss_ticks: t.stop_loss_ticks ?? null,
+          take_profit_ticks: t.take_profit_ticks ?? null,
+          risk_dollars: t.risk_dollars,
+          pnl_dollars: t.pnl_dollars,
+          pnl_r: t.pnl_r,
+          screenshot_url: null,
+          plan_followed: t.plan_followed,
+          emotional_state,
+          plan_compliance,
+          stop_discipline,
+          mistakes: t.mindset ? `Psychologie : ${t.mindset}` : null,
+          notes: t.notes || null,
+          market_context: `Session : ${t.session_tag || 'NY AM'} | Setup : ${t.technique_tag || 'Volume Profile'}`,
+        };
+      });
 
       const res = await batchCreateTrades(payload);
       setSaveSuccessCount(res.count);

@@ -7,6 +7,7 @@ import { TradeList } from './trade-list';
 import { EconomicCalendarWidget } from './economic-calendar-widget';
 import { PropFirmSummaryWidget } from './prop-firm-guardian/prop-firm-summary-widget';
 import { PropFirmGuardianView } from './prop-firm-guardian/prop-firm-guardian-view';
+import { PsychologyTabView } from './psychology/psychology-tab-view';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -15,6 +16,7 @@ import {
   BarChart3,
   Shield,
   UploadCloud,
+  BrainCircuit,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { PropFirmAccount } from '@/types/prop-firm';
@@ -26,7 +28,7 @@ interface TradingHubTabsProps {
 }
 
 export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsProps) {
-  const [activeTab, setActiveTab] = useState<'journal' | 'stats' | 'guardian'>('journal');
+  const [activeTab, setActiveTab] = useState<'journal' | 'stats' | 'psychology' | 'guardian'>('journal');
 
   return (
     <div className="space-y-8">
@@ -64,6 +66,19 @@ export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsP
             >
               <BarChart3 className="w-4 h-4 shrink-0" />
               <span>Statistiques ({stats.winRate.toFixed(0)}%)</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('psychology')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                activeTab === 'psychology'
+                  ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <BrainCircuit className="w-4 h-4 shrink-0" />
+              <span>Psychologie & Tilt</span>
             </button>
 
             <button
@@ -184,7 +199,14 @@ export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsP
         </div>
       )}
 
-      {/* TAB 3: GUARDIAN */}
+      {/* TAB 3: PSYCHOLOGIE & TILT */}
+      {activeTab === 'psychology' && (
+        <div className="space-y-6">
+          <PsychologyTabView trades={trades} />
+        </div>
+      )}
+
+      {/* TAB 4: GUARDIAN */}
       {activeTab === 'guardian' && (
         <div className="space-y-6">
           <PropFirmGuardianView accounts={accounts} />
