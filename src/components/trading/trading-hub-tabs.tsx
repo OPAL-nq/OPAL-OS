@@ -10,7 +10,6 @@ import { PropFirmGuardianView } from './prop-firm-guardian/prop-firm-guardian-vi
 import { PsychologyTabView } from './psychology/psychology-tab-view';
 import { InstitutionalAuditModal } from './audit/institutional-audit-modal';
 import { DailyProtocolWidget } from './protocol/daily-protocol-widget';
-import { TraderContractTab } from './contract/trader-contract-tab';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -21,7 +20,6 @@ import {
   UploadCloud,
   BrainCircuit,
   Flame,
-  FileSignature,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { PropFirmAccount } from '@/types/prop-firm';
@@ -39,7 +37,7 @@ interface TradingHubTabsProps {
 }
 
 export function TradingHubTabs({ trades, stats, accounts = [], protocolData }: TradingHubTabsProps) {
-  const [activeTab, setActiveTab] = useState<'journal' | 'stats' | 'psychology' | 'guardian' | 'protocol' | 'contract'>('journal');
+  const [activeTab, setActiveTab] = useState<'journal' | 'stats' | 'psychology' | 'guardian' | 'protocol'>('journal');
 
   return (
     <div className="space-y-8">
@@ -116,19 +114,6 @@ export function TradingHubTabs({ trades, stats, accounts = [], protocolData }: T
             >
               <Shield className="w-4 h-4 shrink-0" />
               <span>Guardian ({accounts.length})</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('contract')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
-                activeTab === 'contract'
-                  ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
-                  : 'text-neutral-400 hover:text-white'
-              }`}
-            >
-              <FileSignature className="w-4 h-4 shrink-0 text-cyan-400" />
-              <span>Contrat Pro</span>
             </button>
           </div>
         </div>
@@ -280,13 +265,6 @@ export function TradingHubTabs({ trades, stats, accounts = [], protocolData }: T
       {activeTab === 'guardian' && (
         <div className="space-y-6">
           <PropFirmGuardianView accounts={accounts} />
-        </div>
-      )}
-
-      {/* TAB 6: CONTRAT PRO */}
-      {activeTab === 'contract' && (
-        <div className="space-y-6">
-          <TraderContractTab />
         </div>
       )}
     </div>
