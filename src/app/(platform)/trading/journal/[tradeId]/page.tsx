@@ -31,7 +31,7 @@ export default async function TradeDetailPage({ params }: Props) {
 
   const { data: tradeData } = await supabase
     .from('trades')
-    .select('*, workspace_session:workspace_sessions(*)')
+    .select('*')
     .eq('id', tradeId)
     .eq('user_id', user?.id || '')
     .single();
@@ -40,7 +40,7 @@ export default async function TradeDetailPage({ params }: Props) {
     notFound();
   }
 
-  const trade = tradeData as Trade & { workspace_session: WorkspaceSession | null };
+  const trade = tradeData as Trade;
   const isWin = trade.pnl_r > 0;
   const isLoss = trade.pnl_r < 0;
   const formattedDate = new Date(trade.trade_date).toLocaleDateString('fr-FR', {
@@ -148,21 +148,6 @@ export default async function TradeDetailPage({ params }: Props) {
               </span>
             )}
           </div>
-
-          {/* Associated Session */}
-          {trade.workspace_session && (
-            <div className="p-4 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs text-neutral-300">
-                <Layers className="w-4 h-4 text-[#39FF14]" />
-                <span>Rattaché au plan de session du {trade.workspace_session.session_date} ({trade.workspace_session.bias})</span>
-              </div>
-              <Link href={`/trading/workspace/${trade.workspace_session.id}`}>
-                <Button size="sm" variant="outline" className="h-7 text-xs border-white/10 text-white hover:bg-white/10">
-                  Voir la session
-                </Button>
-              </Link>
-            </div>
-          )}
 
           {/* Notes & Mistakes */}
           {(trade.notes || trade.mistakes) && (

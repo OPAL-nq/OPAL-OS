@@ -7,7 +7,6 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { INSTRUMENTS, InstrumentSpec } from '@/lib/trading-constants';
-import { WorkspaceSession } from '@/types/trading';
 import { ScreenshotUploader } from './screenshot-uploader';
 import {
   TrendingUp,
@@ -23,11 +22,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 
-interface TradeFormProps {
-  sessions?: WorkspaceSession[];
-}
-
-export function TradeForm({ sessions = [] }: TradeFormProps) {
+export function TradeForm() {
   const [instrument, setInstrument] = useState<string>('NQ');
   const [direction, setDirection] = useState<'Long' | 'Short'>('Long');
   const [stopLossTicks, setStopLossTicks] = useState<string>('');
@@ -112,34 +107,17 @@ export function TradeForm({ sessions = [] }: TradeFormProps) {
         <CardContent className="p-6 space-y-6">
           {/* 1. Date & Session */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
+            <div className="sm:col-span-2">
               <label className="text-xs font-semibold text-neutral-300 block mb-1.5">
-                Date & Heure du Trade
+                Date & Heure d'Exécution
               </label>
               <Input
                 type="datetime-local"
                 name="trade_date"
                 defaultValue={new Date().toISOString().slice(0, 16)}
-                className="bg-black/50 border-white/10 text-white font-mono text-xs"
+                className="bg-black/50 border-white/10 text-white font-mono text-xs max-w-sm"
                 required
               />
-            </div>
-
-            <div>
-              <label className="text-xs font-semibold text-neutral-300 block mb-1.5">
-                Rattacher à une Session (Optionnel)
-              </label>
-              <select
-                name="workspace_session_id"
-                className="w-full bg-black/50 border border-white/10 rounded-md h-9 px-3 text-xs text-white focus:outline-none focus:border-[#39FF14]"
-              >
-                <option value="">Aucune session spécifique</option>
-                {sessions.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.session_date} — {s.instrument} ({s.bias} / {s.decision})
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
 

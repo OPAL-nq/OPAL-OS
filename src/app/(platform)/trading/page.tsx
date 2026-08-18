@@ -1,7 +1,6 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
-import { Trade, WorkspaceSession, TradeStats } from '@/types/trading';
-import { QuickLinks } from '@/components/trading/quick-links';
+import { Trade, TradeStats } from '@/types/trading';
 import { TradingHubTabs } from '@/components/trading/trading-hub-tabs';
 import { TrendingUp } from 'lucide-react';
 
@@ -10,15 +9,6 @@ export const dynamic = 'force-dynamic';
 export default async function TradingHubPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-
-  // Fetch user's workspace sessions
-  const { data: sessionsData } = await supabase
-    .from('workspace_sessions')
-    .select('*')
-    .eq('user_id', user?.id || '')
-    .order('session_date', { ascending: false });
-
-  const sessions = (sessionsData || []) as WorkspaceSession[];
 
   // Fetch user's trades & prop firm accounts in parallel
   const [tradesRes, accountsRes] = await Promise.all([
@@ -68,19 +58,19 @@ export default async function TradingHubPage() {
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold text-[#39FF14] uppercase tracking-wider mb-1">
             <TrendingUp className="w-4 h-4" />
-            <span>OPAL Trading System</span>
+            <span>OPAL Trading Hub</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Workspace & Journal de Trading
+            Journal de Trading & Performance
           </h1>
           <p className="text-sm text-neutral-400 mt-1">
-            Préparez votre session, formalisez votre décision et suivez vos performances R.
+            Enregistrez vos trades, importez vos données broker et suivez votre rigueur d'exécution en R.
           </p>
         </div>
       </div>
 
-      {/* Main Tabs Segment: Sessions, Journal, Stats, Guardian & Integrated Calendar */}
-      <TradingHubTabs sessions={sessions} trades={trades} stats={stats} accounts={accounts} />
+      {/* Main Tabs: Journal, Stats, Guardian & Integrated Economic Calendar */}
+      <TradingHubTabs trades={trades} stats={stats} accounts={accounts} />
     </div>
   );
 }
