@@ -96,7 +96,6 @@ export function MobileNav({ profile, isOpen, onClose }: MobileNavProps) {
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/academy', label: 'Academy', icon: GraduationCap },
     { href: '/trading', label: 'Trading', icon: TrendingUp },
-    { href: '/systems', label: 'Systems', icon: Cpu },
     { href: '/community', label: 'Community', icon: MessageSquare },
     {
       href: '/messages',

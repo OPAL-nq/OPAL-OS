@@ -8,10 +8,21 @@ import { Button } from '@/components/ui/button';
 export function EconomicCalendarWidget() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(true);
+  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    setIsMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isMounted || !isExpanded || !containerRef.current) return;
+
+    // Clear previous injection safely
     containerRef.current.innerHTML = '';
+
+    const widgetDiv = document.createElement('div');
+    widgetDiv.className = 'tradingview-widget-container__widget';
+    containerRef.current.appendChild(widgetDiv);
 
     const script = document.createElement('script');
     script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-events.js';
@@ -28,7 +39,13 @@ export function EconomicCalendarWidget() {
     });
 
     containerRef.current.appendChild(script);
-  }, []);
+
+    return () => {
+      if (containerRef.current) {
+        containerRef.current.innerHTML = '';
+      }
+    };
+  }, [isMounted, isExpanded]);
 
   return (
     <Card className="bg-[#141414] border-white/10 overflow-hidden">
@@ -62,10 +79,9 @@ export function EconomicCalendarWidget() {
           <div
             className="tradingview-widget-container"
             ref={containerRef}
+            suppressHydrationWarning
             style={{ height: '420px', width: '100%' }}
-          >
-            <div className="tradingview-widget-container__widget"></div>
-          </div>
+          />
         </CardContent>
       )}
     </Card>

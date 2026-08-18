@@ -177,12 +177,6 @@ export function Sidebar({ profile }: SidebarProps) {
               isCollapsed={isCollapsed}
             />
             <SidebarItem
-              href="/systems"
-              icon={Cpu}
-              label="Systems"
-              isCollapsed={isCollapsed}
-            />
-            <SidebarItem
               href="/community"
               icon={MessageSquare}
               label="Community"

@@ -154,7 +154,7 @@ export function TiltRadarGauge({ metrics }: TiltRadarGaugeProps) {
             <span className="text-[10px] uppercase tracking-wider text-neutral-400 font-medium">Dernier Trade</span>
             <div className="text-xs font-mono text-neutral-300 flex items-center gap-1">
               <Clock className="w-3 h-3 text-neutral-500" />
-              <span>
+              <span suppressHydrationWarning>
                 {todayStats.minutesSinceLastTrade !== null
                   ? `Il y a ${todayStats.minutesSinceLastTrade} min`
                   : 'Aucun trade'}
