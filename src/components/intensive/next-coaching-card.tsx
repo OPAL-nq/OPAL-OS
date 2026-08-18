@@ -2,10 +2,11 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Calendar, Clock, Video, ArrowRight, User } from 'lucide-react';
+import { Calendar, Clock, ArrowRight, User, FileEdit, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import type { CoachingSession } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface NextCoachingCardProps {
   session: CoachingSession | null;
@@ -43,8 +44,8 @@ export function NextCoachingCard({ session }: NextCoachingCardProps) {
               size="sm"
               className="border-white/10 hover:bg-white/5 text-xs text-neutral-300"
             >
-              <Link href="/trading/workspace/new">
-                <span>Préparer une session</span>
+              <Link href="/intensive/coaching">
+                <span>Planning des séances</span>
               </Link>
             </Button>
           </div>
@@ -68,6 +69,10 @@ export function NextCoachingCard({ session }: NextCoachingCardProps) {
     hour: '2-digit',
     minute: '2-digit',
   });
+
+  const prep = session.preparation;
+  const isPrepSubmitted = prep?.status === 'submitted' || prep?.status === 'reviewed';
+  const isPrepDraft = prep?.status === 'draft';
 
   return (
     <Card className="bg-gradient-to-br from-[#161616] via-[#141414] to-[#101010] border-[#39FF14]/30 relative overflow-hidden shadow-[0_0_25px_rgba(57,255,20,0.06)]">
@@ -101,6 +106,37 @@ export function NextCoachingCard({ session }: NextCoachingCardProps) {
             <span>Coaching privé 1-on-1 avec Maxym</span>
           </div>
 
+          {/* Preparation Status Badge */}
+          <div className="mt-3 flex items-center gap-2">
+            <span
+              className={cn(
+                'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold border',
+                isPrepSubmitted
+                  ? 'bg-[#39FF14]/10 text-[#39FF14] border-[#39FF14]/30'
+                  : isPrepDraft
+                  ? 'bg-amber-500/10 text-amber-300 border-amber-500/30'
+                  : 'bg-white/5 text-neutral-400 border-white/10'
+              )}
+            >
+              {isPrepSubmitted ? (
+                <>
+                  <CheckCircle2 className="w-3.5 h-3.5" />
+                  <span>Fiche préparée & transmise ✓</span>
+                </>
+              ) : isPrepDraft ? (
+                <>
+                  <FileEdit className="w-3.5 h-3.5" />
+                  <span>Brouillon de préparation en cours</span>
+                </>
+              ) : (
+                <>
+                  <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Fiche de préparation non remplie</span>
+                </>
+              )}
+            </span>
+          </div>
+
           {session.notes && (
             <p className="mt-3 text-xs text-neutral-400 bg-black/40 p-2.5 rounded-lg border border-white/5 italic">
               « {session.notes} »
@@ -108,20 +144,21 @@ export function NextCoachingCard({ session }: NextCoachingCardProps) {
           )}
         </div>
 
-        <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between">
+        <div className="mt-6 pt-4 border-t border-white/5 flex items-center justify-between gap-3">
           <Link
             href="/intensive/coaching"
             className="text-xs text-neutral-400 hover:text-white transition-colors"
           >
-            Voir l'historique
+            Planning complet
           </Link>
           <Button
             asChild
             className="bg-[#39FF14] text-black hover:bg-[#39FF14]/90 font-bold text-xs h-9 px-4 shadow-[0_0_15px_rgba(57,255,20,0.2)]"
           >
-            <Link href="/trading/workspace/new">
-              <span>Préparer ma session</span>
-              <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
+            <Link href={`/intensive/coaching/prepare/${session.id}`}>
+              <FileEdit className="w-3.5 h-3.5 mr-1.5" />
+              <span>Préparer mon coaching</span>
+              <ArrowRight className="w-3.5 h-3.5 ml-1" />
             </Link>
           </Button>
         </div>

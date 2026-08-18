@@ -23,6 +23,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { AdminCoachingForm } from './admin-coaching-form';
 import { AdminCoachingReportForm } from './admin-coaching-report-form';
+import { AdminCoachingPreparationModal } from './admin-coaching-preparation-modal';
 import { AdminObjectiveForm } from './admin-objective-form';
 import { AdminFollowUpForm } from './admin-follow-up-form';
 import {
@@ -321,6 +322,12 @@ export function AdminIntensiveClient({
                       </div>
 
                       <div className="flex items-center gap-1.5 self-end sm:self-center">
+                        {/* Preparation sheet modal */}
+                        <AdminCoachingPreparationModal
+                          session={session}
+                          clientName={clientName}
+                        />
+
                         {/* Report button */}
                         <AdminCoachingReportForm
                           sessionId={session.id}

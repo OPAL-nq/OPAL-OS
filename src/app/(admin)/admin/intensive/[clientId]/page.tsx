@@ -57,7 +57,7 @@ export default async function AdminIntensiveClientPage({
   const [sessionsRes, reportsRes, objectivesRes, followUpRes] = await Promise.all([
     supabase
       .from('coaching_sessions')
-      .select('*')
+      .select('*, preparation:coaching_preparations(*)')
       .eq('client_id', clientId)
       .order('scheduled_at', { ascending: false }),
     supabase
@@ -78,7 +78,10 @@ export default async function AdminIntensiveClientPage({
       .maybeSingle(),
   ]);
 
-  const sessions: CoachingSession[] = sessionsRes.data || [];
+  const sessions: CoachingSession[] = (sessionsRes.data || []).map((s: any) => ({
+    ...s,
+    preparation: Array.isArray(s.preparation) ? s.preparation[0] || null : s.preparation || null,
+  }));
   const reports: CoachingReport[] = reportsRes.data || [];
   const objectives: IntensiveObjective[] = objectivesRes.data || [];
   const followUp: IntensiveFollowUp | null = followUpRes.data || null;

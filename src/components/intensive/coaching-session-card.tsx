@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Calendar, Clock, CheckCircle2, XCircle, AlertCircle, FileText } from 'lucide-react';
+import { Calendar, Clock, CheckCircle2, XCircle, AlertCircle, FileText, FileEdit } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
@@ -28,6 +28,7 @@ export function CoachingSessionCard({ session }: CoachingSessionCardProps) {
   const isCompleted = session.status === 'completed';
   const isCancelled = session.status === 'cancelled';
   const isScheduled = session.status === 'scheduled';
+  const prep = session.preparation;
 
   return (
     <Card className="bg-[#141414] border-white/5 hover:border-white/10 transition-colors">
@@ -88,12 +89,31 @@ export function CoachingSessionCard({ session }: CoachingSessionCardProps) {
             {isCompleted ? 'Terminé' : isCancelled ? 'Annulé' : 'Planifié'}
           </span>
 
+          {isScheduled && (
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className={cn(
+                'h-8 text-xs font-semibold border',
+                prep?.status === 'submitted'
+                  ? 'border-[#39FF14]/30 text-[#39FF14] bg-[#39FF14]/10'
+                  : 'border-white/10 text-neutral-300 hover:bg-white/5'
+              )}
+            >
+              <Link href={`/intensive/coaching/prepare/${session.id}`}>
+                <FileEdit className="w-3.5 h-3.5 mr-1" />
+                <span>{prep?.status === 'submitted' ? 'Fiche prête ✓' : 'Préparer'}</span>
+              </Link>
+            </Button>
+          )}
+
           {session.report && (
             <Button
               asChild
               variant="outline"
               size="sm"
-              className="border-white/10 hover:bg-white/5 text-xs text-neutral-300"
+              className="border-white/10 hover:bg-white/5 text-xs text-neutral-300 h-8"
             >
               <Link href="/intensive/reports">
                 <FileText className="w-3.5 h-3.5 mr-1 text-[#39FF14]" />

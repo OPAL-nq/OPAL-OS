@@ -8,6 +8,10 @@ import type {
   IntensiveObjective,
   IntensiveFollowUp,
   Profile,
+  CoachingPreparation,
+  CoachingPreparationDifficulties,
+  TradeToReview,
+  PreparationStatus,
 } from '@/types';
 
 // ==========================================
@@ -542,3 +546,128 @@ export async function upsertFollowUp(data: {
 
   return { success: true, followUp };
 }
+
+// ==========================================
+// 6. COACHING PREPARATIONS
+// ==========================================
+
+export async function upsertCoachingPreparation(data: {
+  sessionId: string;
+  questions?: string;
+  difficulties?: CoachingPreparationDifficulties;
+  tradesToReview?: TradeToReview[];
+  keyGoals?: string;
+  status?: PreparationStatus;
+}) {
+  const { supabase, user, profile } = await requireIntensiveOrAdmin();
+
+  if (!data.sessionId) {
+    throw new Error('Paramètre sessionId requis.');
+  }
+
+  // Verify session belongs to user or user is admin
+  const { data: session, error: sessionErr } = await supabase
+    .from('coaching_sessions')
+    .select('*')
+    .eq('id', data.sessionId)
+    .single();
+
+  if (sessionErr || !session) {
+    throw new Error('Séance de coaching introuvable.');
+  }
+
+  if (profile?.role !== 'admin' && session.client_id !== user.id) {
+    throw new Error('Non autorisé à modifier cette préparation.');
+  }
+
+  const payload: Record<string, any> = {
+    session_id: data.sessionId,
+    client_id: session.client_id,
+    questions: data.questions !== undefined ? (data.questions.trim() || null) : null,
+    difficulties: data.difficulties || { psychology: [], technique: [], risk: [], notes: '' },
+    trades_to_review: data.tradesToReview || [],
+    key_goals: data.keyGoals !== undefined ? (data.keyGoals.trim() || null) : null,
+    status: data.status || 'draft',
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data: prep, error } = await supabase
+    .from('coaching_preparations')
+    .upsert(payload, { onConflict: 'session_id' })
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Erreur upsertCoachingPreparation:', error);
+    throw new Error(error.message || 'Impossible de sauvegarder la fiche de préparation.');
+  }
+
+  // If submitted by client, notify admin
+  if (data.status === 'submitted' && profile?.role !== 'admin') {
+    // Notify admin
+    const { data: admins } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('role', 'admin');
+
+    const clientName = profile?.full_name || profile?.email || 'Un élève';
+    if (admins && admins.length > 0) {
+      for (const admin of admins) {
+        await notifyClient(
+          supabase,
+          admin.id,
+          'Fiche de coaching prête 📋',
+          `${clientName} a préparé sa fiche pour la séance de coaching.`,
+          `/admin/intensive/${session.client_id}`
+        );
+      }
+    }
+  }
+
+  revalidatePath('/intensive');
+  revalidatePath('/intensive/coaching');
+  revalidatePath(`/intensive/coaching/prepare/${data.sessionId}`);
+  revalidatePath('/admin/intensive');
+  revalidatePath(`/admin/intensive/${session.client_id}`);
+
+  return { success: true, preparation: prep as CoachingPreparation };
+}
+
+export async function updateCoachNotes(preparationId: string, coachNotes: string) {
+  const { supabase } = await requireAdmin();
+
+  if (!preparationId) {
+    throw new Error('Paramètre preparationId requis.');
+  }
+
+  const { data: existing, error: fetchErr } = await supabase
+    .from('coaching_preparations')
+    .select('*')
+    .eq('id', preparationId)
+    .single();
+
+  if (fetchErr || !existing) {
+    throw new Error('Fiche de préparation introuvable.');
+  }
+
+  const { data: updated, error } = await supabase
+    .from('coaching_preparations')
+    .update({
+      coach_notes: coachNotes.trim() || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', preparationId)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Erreur updateCoachNotes:', error);
+    throw new Error(error.message || 'Impossible d’enregistrer les notes du coach.');
+  }
+
+  revalidatePath('/admin/intensive');
+  revalidatePath(`/admin/intensive/${existing.client_id}`);
+
+  return { success: true, preparation: updated as CoachingPreparation };
+}
+

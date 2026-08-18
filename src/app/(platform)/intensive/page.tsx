@@ -137,7 +137,7 @@ export default async function IntensiveCockpitPage() {
   const [sessionsRes, followUpRes, objectivesRes, reportsRes] = await Promise.all([
     supabase
       .from('coaching_sessions')
-      .select('*')
+      .select('*, preparation:coaching_preparations(*)')
       .eq('client_id', user.id)
       .order('scheduled_at', { ascending: true }),
     supabase
@@ -157,7 +157,10 @@ export default async function IntensiveCockpitPage() {
       .order('created_at', { ascending: false }),
   ]);
 
-  const sessions: CoachingSession[] = sessionsRes.data || [];
+  const sessions: CoachingSession[] = (sessionsRes.data || []).map((s: any) => ({
+    ...s,
+    preparation: Array.isArray(s.preparation) ? s.preparation[0] || null : s.preparation || null,
+  }));
   const followUp: IntensiveFollowUp | null = followUpRes.data || null;
   const objectives: IntensiveObjective[] = objectivesRes.data || [];
   const reports: CoachingReport[] = reportsRes.data || [];
@@ -191,16 +194,28 @@ export default async function IntensiveCockpitPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            asChild
-            variant="outline"
-            size="sm"
-            className="border-white/10 text-xs text-neutral-300 hover:bg-white/5"
-          >
-            <Link href="/trading/workspace/new">
-              <span>Préparer une session</span>
-            </Link>
-          </Button>
+          {nextSession ? (
+            <Button
+              asChild
+              size="sm"
+              className="bg-[#39FF14] text-black hover:bg-[#39FF14]/90 font-bold text-xs shadow-[0_0_15px_rgba(57,255,20,0.2)]"
+            >
+              <Link href={`/intensive/coaching/prepare/${nextSession.id}`}>
+                <span>Préparer mon coaching</span>
+              </Link>
+            </Button>
+          ) : (
+            <Button
+              asChild
+              variant="outline"
+              size="sm"
+              className="border-white/10 text-xs text-neutral-300 hover:bg-white/5"
+            >
+              <Link href="/intensive/coaching">
+                <span>Planning des coachings</span>
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
 

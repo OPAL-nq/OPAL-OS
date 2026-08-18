@@ -31,11 +31,14 @@ export default async function IntensiveCoachingPage() {
 
   const { data: sessionsData } = await supabase
     .from('coaching_sessions')
-    .select('*, report:coaching_reports(*)')
+    .select('*, report:coaching_reports(*), preparation:coaching_preparations(*)')
     .eq('client_id', user.id)
     .order('scheduled_at', { ascending: false });
 
-  const sessions: CoachingSession[] = sessionsData || [];
+  const sessions: CoachingSession[] = (sessionsData || []).map((s: any) => ({
+    ...s,
+    preparation: Array.isArray(s.preparation) ? s.preparation[0] || null : s.preparation || null,
+  }));
 
   const now = new Date().toISOString();
   // Upcoming session
