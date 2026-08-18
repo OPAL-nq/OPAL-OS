@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { Trade } from '@/types/trading';
 import { deleteTrade } from '@/app/actions/trades';
 import { Button } from '@/components/ui/button';
+import { TradingCardModal } from './cards/trading-card-modal';
 import {
   TrendingUp,
   TrendingDown,
@@ -16,6 +17,7 @@ import {
   Eye,
   Plus,
   UploadCloud,
+  Sparkles,
 } from 'lucide-react';
 
 interface TradeListProps {
@@ -269,7 +271,12 @@ export function TradeList({ trades }: TradeListProps) {
                           <span className="text-neutral-600">—</span>
                         )}
                       </td>
-                      <td className="p-3.5 text-right space-x-1">
+                      <td className="p-3.5 text-right space-x-1 whitespace-nowrap">
+                        <TradingCardModal
+                          trade={trade}
+                          triggerButtonText=""
+                          className="!px-2 !py-1 !h-7 !min-w-[28px] !rounded-lg text-amber-300 border-amber-400/30 hover:border-amber-400/60"
+                        />
                         <Link href={`/trading/journal/${trade.id}`}>
                           <Button
                             variant="ghost"
@@ -366,10 +373,17 @@ export function TradeList({ trades }: TradeListProps) {
                   </div>
 
                   <div className="flex items-center justify-between pt-2 border-t border-white/5">
-                    <Link href={`/trading/journal/${trade.id}`} className="text-xs text-[#39FF14] hover:underline flex items-center gap-1">
-                      <Eye className="w-3.5 h-3.5" />
-                      Voir la fiche
-                    </Link>
+                    <div className="flex items-center gap-3">
+                      <Link href={`/trading/journal/${trade.id}`} className="text-xs text-[#39FF14] hover:underline flex items-center gap-1">
+                        <Eye className="w-3.5 h-3.5" />
+                        Voir la fiche
+                      </Link>
+                      <TradingCardModal
+                        trade={trade}
+                        triggerButtonText="Carte HD"
+                        className="!px-2 !py-0.5 !text-[11px]"
+                      />
+                    </div>
 
                     <Button
                       variant="ghost"

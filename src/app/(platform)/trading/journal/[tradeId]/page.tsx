@@ -16,6 +16,7 @@ import {
   FileText,
   AlertTriangle,
 } from 'lucide-react';
+import { TradingCardModal } from '@/components/trading/cards/trading-card-modal';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -29,12 +30,19 @@ export default async function TradeDetailPage({ params }: Props) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const { data: tradeData } = await supabase
-    .from('trades')
-    .select('*')
-    .eq('id', tradeId)
-    .eq('user_id', user?.id || '')
-    .single();
+  const [{ data: tradeData }, { data: profile }] = await Promise.all([
+    supabase
+      .from('trades')
+      .select('*')
+      .eq('id', tradeId)
+      .eq('user_id', user?.id || '')
+      .single(),
+    supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user?.id || '')
+      .single(),
+  ]);
 
   if (!tradeData) {
     notFound();
@@ -54,13 +62,20 @@ export default async function TradeDetailPage({ params }: Props) {
   return (
     <div className="space-y-6 max-w-4xl mx-auto pb-16">
       {/* Header Bar */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <Link href="/trading">
           <Button variant="ghost" size="sm" className="text-neutral-400 hover:text-white">
             <ArrowLeft className="w-4 h-4 mr-1.5" />
             Retour à Mes Trades
           </Button>
         </Link>
+
+        {/* Viral Trading Card Trigger */}
+        <TradingCardModal
+          trade={trade}
+          userHandle={profile?.full_name || 'OPAL TRADER'}
+          triggerButtonText="Créer ma Trading Card ⚡"
+        />
       </div>
 
       {/* Main Trade Summary Card */}
