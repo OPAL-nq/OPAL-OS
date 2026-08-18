@@ -1,7 +1,7 @@
 import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Shield, Users, GraduationCap, Radio, Flame, MessageSquareMore } from 'lucide-react';
+import { Shield, Users, GraduationCap, Radio, Flame, MessageSquareMore, MessageSquare } from 'lucide-react';
 import Link from 'next/link';
 import type { Profile } from '@/types';
 
@@ -159,17 +159,17 @@ export default async function AdminDashboardPage() {
             </Card>
           </Link>
 
-          <Link href="/admin/community" className="group">
-            <Card className="bg-[#141414] border-white/5 group-hover:border-[#39FF14]/40 transition-all p-5 h-full flex flex-col justify-between">
+          <Link href="/community" className="group">
+            <Card className="bg-[#141414] border-white/5 group-hover:border-[#5865F2]/40 transition-all p-5 h-full flex flex-col justify-between">
               <div className="space-y-2">
-                <div className="w-9 h-9 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-blue-400">
-                  <Shield className="w-5 h-5" />
+                <div className="w-9 h-9 rounded-xl bg-[#5865F2]/10 border border-[#5865F2]/20 flex items-center justify-center text-[#5865F2]">
+                  <MessageSquare className="w-5 h-5" />
                 </div>
-                <h3 className="font-bold text-white group-hover:text-[#39FF14] transition-colors text-sm">
-                  Admin Community
+                <h3 className="font-bold text-white group-hover:text-[#5865F2] transition-colors text-sm">
+                  Communauté Discord
                 </h3>
                 <p className="text-xs text-neutral-400">
-                  Gestion des 9 salons, ordre d'affichage et modération.
+                  Accès direct au serveur Discord officiel OPAL et gestion des liens.
                 </p>
               </div>
             </Card>

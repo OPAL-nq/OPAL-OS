@@ -118,7 +118,6 @@ export function MobileNav({ profile, isOpen, onClose }: MobileNavProps) {
     },
     { href: '/admin/academy', label: 'Admin Academy', icon: BookOpen },
     { href: '/admin/live', label: 'Admin Lives & Replays', icon: Radio },
-    { href: '/admin/community', label: 'Admin Community', icon: MessageSquare },
     { href: '/admin/intensive', label: 'Admin Intensive', icon: Flame },
   ];
 

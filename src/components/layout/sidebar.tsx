@@ -270,12 +270,7 @@ export function Sidebar({ profile }: SidebarProps) {
                 label="Admin Lives & Replays"
                 isCollapsed={isCollapsed}
               />
-              <SidebarItem
-                href="/admin/community"
-                icon={MessageSquare}
-                label="Admin Community"
-                isCollapsed={isCollapsed}
-              />
+
               <SidebarItem
                 href="/admin/intensive"
                 icon={Flame}
