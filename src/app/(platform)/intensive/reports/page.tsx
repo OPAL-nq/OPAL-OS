@@ -4,7 +4,9 @@ import { createClient } from '@/lib/supabase/server';
 import { FileText } from 'lucide-react';
 import { IntensiveNav } from '@/components/intensive/intensive-nav';
 import { CoachingReportCard } from '@/components/intensive/coaching-report-card';
+import { InstitutionalAuditModal } from '@/components/trading/audit/institutional-audit-modal';
 import type { CoachingReport } from '@/types';
+import type { Trade } from '@/types/trading';
 
 export const dynamic = 'force-dynamic';
 
@@ -28,28 +30,53 @@ export default async function IntensiveReportsPage() {
     redirect('/intensive');
   }
 
-  const { data: reportsData } = await supabase
-    .from('coaching_reports')
-    .select('*, session:coaching_sessions(*)')
-    .eq('client_id', user.id)
-    .order('created_at', { ascending: false });
+  const [reportsRes, tradesRes, accountsRes] = await Promise.allSettled([
+    supabase
+      .from('coaching_reports')
+      .select('*, session:coaching_sessions(*)')
+      .eq('client_id', user.id)
+      .order('created_at', { ascending: false }),
+    supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('trade_date', { ascending: false }),
+    supabase
+      .from('prop_firm_accounts')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false }),
+  ]);
 
-  const reports: CoachingReport[] = reportsData || [];
+  const reports: CoachingReport[] = (reportsRes.status === 'fulfilled' && reportsRes.value.data) || [];
+  const trades: Trade[] = (tradesRes.status === 'fulfilled' && tradesRes.value.data) as Trade[] || [];
+  const accounts: any[] = (accountsRes.status === 'fulfilled' && accountsRes.value.data) || [];
 
   return (
     <div className="max-w-7xl mx-auto space-y-6">
       {/* Top Header */}
-      <div>
-        <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#39FF14]/10 border border-[#39FF14]/30 text-[#39FF14] text-xs font-semibold uppercase tracking-wider mb-2">
-          <FileText className="w-3.5 h-3.5" />
-          <span>Comptes Rendus & Débriefs</span>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full bg-[#39FF14]/10 border border-[#39FF14]/30 text-[#39FF14] text-xs font-semibold uppercase tracking-wider mb-2">
+            <FileText className="w-3.5 h-3.5" />
+            <span>Comptes Rendus & Débriefs</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+            Comptes Rendus & Bilans de Coaching
+          </h1>
+          <p className="text-xs sm:text-sm text-neutral-400 mt-1">
+            Retrouvez l'ensemble des synthèses écrites et générez vos dossiers d'audit officiels certifiés OPAL.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-          Comptes Rendus de Coaching
-        </h1>
-        <p className="text-xs sm:text-sm text-neutral-400 mt-1">
-          Retrouvez l'ensemble des synthèses écrites, points clés et exercices de travail assignés par Maxym.
-        </p>
+
+        <div>
+          <InstitutionalAuditModal
+            trades={trades}
+            accounts={accounts}
+            userProfile={profile || undefined}
+            triggerButtonText="Générer un Dossier d’Audit PDF"
+          />
+        </div>
       </div>
 
       {/* Navigation Tabs */}

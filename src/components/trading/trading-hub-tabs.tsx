@@ -8,6 +8,7 @@ import { EconomicCalendarWidget } from './economic-calendar-widget';
 import { PropFirmSummaryWidget } from './prop-firm-guardian/prop-firm-summary-widget';
 import { PropFirmGuardianView } from './prop-firm-guardian/prop-firm-guardian-view';
 import { PsychologyTabView } from './psychology/psychology-tab-view';
+import { InstitutionalAuditModal } from './audit/institutional-audit-modal';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -96,8 +97,11 @@ export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsP
           </div>
         </div>
 
-        {/* Action Buttons depending on active tab */}
-        <div className="flex items-center gap-2.5">
+        {/* Action Buttons */}
+        <div className="flex items-center flex-wrap gap-2.5">
+          {/* Institutional PDF Audit Generator Modal */}
+          <InstitutionalAuditModal trades={trades} accounts={accounts} />
+
           {activeTab === 'journal' && (
             <>
               <Link href="/trading/import">
@@ -154,7 +158,7 @@ export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsP
 
           <TradeStatsCard stats={stats} />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card className="bg-[#141414] border-white/10 p-6 space-y-4">
               <h3 className="text-sm font-bold text-white">Indicateurs Clés de Succès</h3>
               <div className="space-y-3">
@@ -194,6 +198,25 @@ export function TradingHubTabs({ trades, stats, accounts = [] }: TradingHubTabsP
                   Ouvrir le Guardian & Drawdown
                 </Button>
               </Link>
+            </Card>
+
+            <Card className="bg-[#141414] border-white/10 p-6 space-y-4 flex flex-col justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-bold text-white">Audit Institutionnel PDF</h3>
+                  <span className="px-1.5 py-0.5 rounded bg-[#39FF14]/10 text-[#39FF14] text-[10px] font-mono font-bold">HD</span>
+                </div>
+                <p className="text-xs text-neutral-400 leading-relaxed">
+                  Générez votre bilan officiel multi-pages avec courbes d’équité, ratios de Hedge Fund et validation mentor.
+                </p>
+              </div>
+
+              <InstitutionalAuditModal
+                trades={trades}
+                accounts={accounts}
+                triggerButtonText="Générer mon Rapport PDF"
+                className="w-full justify-center py-2.5"
+              />
             </Card>
           </div>
         </div>
