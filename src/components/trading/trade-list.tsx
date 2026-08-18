@@ -15,6 +15,7 @@ import {
   Filter,
   Eye,
   Plus,
+  UploadCloud,
 } from 'lucide-react';
 
 interface TradeListProps {
@@ -114,23 +115,45 @@ export function TradeList({ trades }: TradeListProps) {
           </select>
         </div>
 
-        <Link href="/trading/journal/new">
-          <Button size="sm" className="bg-[#39FF14] text-black hover:bg-[#32e012] font-semibold text-xs h-8">
-            <Plus className="w-3.5 h-3.5 mr-1" />
-            Nouveau Trade
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link href="/trading/import">
+            <Button
+              size="sm"
+              variant="outline"
+              className="border-white/10 hover:border-[#39FF14]/40 bg-white/5 hover:bg-white/10 text-white font-medium text-xs h-8"
+            >
+              <UploadCloud className="w-3.5 h-3.5 mr-1 text-[#39FF14]" />
+              Importer CSV
+            </Button>
+          </Link>
+
+          <Link href="/trading/journal/new">
+            <Button size="sm" className="bg-[#39FF14] text-black hover:bg-[#32e012] font-semibold text-xs h-8">
+              <Plus className="w-3.5 h-3.5 mr-1" />
+              Nouveau Trade
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Trades List */}
       {filteredTrades.length === 0 ? (
-        <div className="p-12 text-center rounded-xl bg-[#141414] border border-white/10 text-neutral-400 space-y-3">
+        <div className="p-12 text-center rounded-xl bg-[#141414] border border-white/10 text-neutral-400 space-y-4">
           <p className="text-sm">Aucun trade ne correspond aux filtres sélectionnés.</p>
-          <Link href="/trading/journal/new">
-            <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/5 text-xs">
-              Ajouter votre premier trade
-            </Button>
-          </Link>
+          <div className="flex items-center justify-center gap-3">
+            <Link href="/trading/import">
+              <Button size="sm" variant="outline" className="border-white/20 text-white hover:bg-white/5 text-xs">
+                <UploadCloud className="w-3.5 h-3.5 mr-1 text-[#39FF14]" />
+                Importer un fichier CSV
+              </Button>
+            </Link>
+            <Link href="/trading/journal/new">
+              <Button size="sm" className="bg-[#39FF14] text-black hover:bg-[#32e012] font-semibold text-xs">
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                Saisir un trade manuellement
+              </Button>
+            </Link>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">

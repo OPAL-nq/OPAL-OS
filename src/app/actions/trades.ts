@@ -3,6 +3,27 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import type { InstrumentType, TradeDirection } from '@/types/trading';
+
+export interface BatchTradeInput {
+  trade_date: string;
+  instrument: InstrumentType;
+  direction: TradeDirection;
+  entry_price?: number | null;
+  stop_loss?: number | null;
+  take_profit?: number | null;
+  stop_loss_ticks?: number | null;
+  take_profit_ticks?: number | null;
+  risk_dollars: number;
+  pnl_dollars: number;
+  pnl_r: number;
+  screenshot_url?: string | null;
+  plan_followed: boolean;
+  mistakes?: string | null;
+  notes?: string | null;
+  market_context?: string | null;
+  workspace_session_id?: string | null;
+}
 
 export async function createTrade(formData: FormData): Promise<void> {
   const supabase = await createClient();
@@ -13,8 +34,8 @@ export async function createTrade(formData: FormData): Promise<void> {
   }
 
   const trade_date = formData.get('trade_date')?.toString() || new Date().toISOString();
-  const instrument = formData.get('instrument')?.toString() || 'NQ';
-  const direction = formData.get('direction')?.toString() || 'Long';
+  const instrument = (formData.get('instrument')?.toString() || 'NQ') as InstrumentType;
+  const direction = (formData.get('direction')?.toString() || 'Long') as TradeDirection;
   const entry_price = formData.get('entry_price') ? Number(formData.get('entry_price')) : null;
   const stop_loss = formData.get('stop_loss') ? Number(formData.get('stop_loss')) : null;
   const take_profit = formData.get('take_profit') ? Number(formData.get('take_profit')) : null;
@@ -60,6 +81,50 @@ export async function createTrade(formData: FormData): Promise<void> {
   revalidatePath('/trading');
   revalidatePath('/dashboard');
   redirect('/trading');
+}
+
+export async function batchCreateTrades(trades: BatchTradeInput[]): Promise<{ success: boolean; count: number }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error('Non authentifié');
+  }
+
+  if (!trades || trades.length === 0) {
+    return { success: true, count: 0 };
+  }
+
+  const payload = trades.map((t) => ({
+    user_id: user.id,
+    trade_date: t.trade_date,
+    instrument: t.instrument,
+    direction: t.direction,
+    entry_price: t.entry_price ?? null,
+    stop_loss: t.stop_loss ?? null,
+    take_profit: t.take_profit ?? null,
+    stop_loss_ticks: t.stop_loss_ticks ?? null,
+    take_profit_ticks: t.take_profit_ticks ?? null,
+    risk_dollars: t.risk_dollars || 0,
+    pnl_dollars: t.pnl_dollars || 0,
+    pnl_r: t.pnl_r || 0,
+    screenshot_url: t.screenshot_url ?? null,
+    plan_followed: t.plan_followed ?? true,
+    mistakes: t.mistakes ?? null,
+    notes: t.notes ?? null,
+    market_context: t.market_context ?? null,
+    workspace_session_id: t.workspace_session_id || null,
+  }));
+
+  const { error } = await supabase.from('trades').insert(payload);
+
+  if (error) {
+    throw new Error('Erreur lors de l’enregistrement des trades : ' + error.message);
+  }
+
+  revalidatePath('/trading');
+  revalidatePath('/dashboard');
+  return { success: true, count: payload.length };
 }
 
 export async function deleteTrade(tradeId: string): Promise<void> {

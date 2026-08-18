@@ -24,6 +24,8 @@ import {
   ExternalLink,
   Trash2,
   Shield,
+  UploadCloud,
+  FileSpreadsheet,
 } from 'lucide-react';
 import Link from 'next/link';
 import type { PropFirmAccount } from '@/types/prop-firm';
@@ -131,12 +133,23 @@ export function TradingHubTabs({ sessions, trades, stats, accounts = [] }: Tradi
             </Link>
           )}
           {activeTab === 'journal' && (
-            <Link href="/trading/journal/new">
-              <Button className="bg-[#39FF14] text-black hover:bg-[#32e012] font-bold text-xs h-9 shadow-[0_0_15px_rgba(57,255,20,0.25)]">
-                <Plus className="w-4 h-4 mr-1.5" />
-                Nouveau Trade
-              </Button>
-            </Link>
+            <div className="flex items-center gap-2">
+              <Link href="/trading/import">
+                <Button
+                  variant="outline"
+                  className="border-white/10 hover:border-[#39FF14]/40 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs h-9"
+                >
+                  <UploadCloud className="w-4 h-4 mr-1.5 text-[#39FF14]" />
+                  Importer CSV
+                </Button>
+              </Link>
+              <Link href="/trading/journal/new">
+                <Button className="bg-[#39FF14] text-black hover:bg-[#32e012] font-bold text-xs h-9 shadow-[0_0_15px_rgba(57,255,20,0.25)]">
+                  <Plus className="w-4 h-4 mr-1.5" />
+                  Nouveau Trade
+                </Button>
+              </Link>
+            </div>
           )}
           {activeTab === 'guardian' && (
             <Link href="/trading/prop-firm-guardian">
