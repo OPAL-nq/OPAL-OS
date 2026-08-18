@@ -10,22 +10,32 @@ export default async function TradingHubPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Fetch user's trades & prop firm accounts in parallel
-  const [tradesRes, accountsRes] = await Promise.all([
-    supabase
-      .from('trades')
-      .select('*')
-      .eq('user_id', user?.id || '')
-      .order('trade_date', { ascending: false }),
-    supabase
-      .from('prop_firm_accounts')
-      .select('*')
-      .eq('user_id', user?.id || '')
-      .order('created_at', { ascending: false }),
-  ]);
+  let trades: Trade[] = [];
+  let accounts: any[] = [];
 
-  const trades = (tradesRes.data || []) as Trade[];
-  const accounts = (accountsRes.data || []) as any[];
+  try {
+    const [tradesRes, accountsRes] = await Promise.allSettled([
+      supabase
+        .from('trades')
+        .select('*')
+        .eq('user_id', user?.id || '')
+        .order('trade_date', { ascending: false }),
+      supabase
+        .from('prop_firm_accounts')
+        .select('*')
+        .eq('user_id', user?.id || '')
+        .order('created_at', { ascending: false }),
+    ]);
+
+    if (tradesRes.status === 'fulfilled' && tradesRes.value.data) {
+      trades = tradesRes.value.data as Trade[];
+    }
+    if (accountsRes.status === 'fulfilled' && accountsRes.value.data) {
+      accounts = accountsRes.value.data as any[];
+    }
+  } catch (err) {
+    console.error('Erreur récupération données trading:', err);
+  }
 
   // Compute stats
   const totalTrades = trades.length;
