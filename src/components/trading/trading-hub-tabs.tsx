@@ -5,6 +5,8 @@ import { WorkspaceSession, Trade, TradeStats } from '@/types/trading';
 import { TradeStatsCard } from './trade-stats-card';
 import { TradeList } from './trade-list';
 import { EconomicCalendarWidget } from './economic-calendar-widget';
+import { PropFirmSummaryWidget } from './prop-firm-guardian/prop-firm-summary-widget';
+import { PropFirmGuardianView } from './prop-firm-guardian/prop-firm-guardian-view';
 import { deleteWorkspaceSession } from '@/app/actions/workspace';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -21,17 +23,20 @@ import {
   Sparkles,
   ExternalLink,
   Trash2,
+  Shield,
 } from 'lucide-react';
 import Link from 'next/link';
+import type { PropFirmAccount } from '@/types/prop-firm';
 
 interface TradingHubTabsProps {
   sessions: WorkspaceSession[];
   trades: Trade[];
   stats: TradeStats;
+  accounts?: PropFirmAccount[];
 }
 
-export function TradingHubTabs({ sessions, trades, stats }: TradingHubTabsProps) {
-  const [activeTab, setActiveTab] = useState<'sessions' | 'journal' | 'stats'>('sessions');
+export function TradingHubTabs({ sessions, trades, stats, accounts = [] }: TradingHubTabsProps) {
+  const [activeTab, setActiveTab] = useState<'sessions' | 'journal' | 'stats' | 'guardian'>('sessions');
   const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const handleDeleteSession = async (sessionId: string, e: React.MouseEvent) => {
@@ -53,6 +58,9 @@ export function TradingHubTabs({ sessions, trades, stats }: TradingHubTabsProps)
     <div className="space-y-8">
       {/* Live Economic Calendar Widget */}
       <EconomicCalendarWidget />
+
+      {/* Prop Firm Guardian Summary Banner */}
+      <PropFirmSummaryWidget accounts={accounts} />
 
       {/* Tab Navigation Pill Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
@@ -96,6 +104,19 @@ export function TradingHubTabs({ sessions, trades, stats }: TradingHubTabsProps)
               <BarChart3 className="w-4 h-4 shrink-0" />
               <span>Statistiques ({stats.winRate.toFixed(0)}%)</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab('guardian')}
+              className={`flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-lg text-xs font-bold transition-all whitespace-nowrap ${
+                activeTab === 'guardian'
+                  ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.25)]'
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              <Shield className="w-4 h-4 shrink-0" />
+              <span>Guardian ({accounts.length})</span>
+            </button>
           </div>
         </div>
 
@@ -114,6 +135,14 @@ export function TradingHubTabs({ sessions, trades, stats }: TradingHubTabsProps)
               <Button className="bg-[#39FF14] text-black hover:bg-[#32e012] font-bold text-xs h-9 shadow-[0_0_15px_rgba(57,255,20,0.25)]">
                 <Plus className="w-4 h-4 mr-1.5" />
                 Nouveau Trade
+              </Button>
+            </Link>
+          )}
+          {activeTab === 'guardian' && (
+            <Link href="/trading/prop-firm-guardian">
+              <Button className="bg-[#39FF14] text-black hover:bg-[#32e012] font-bold text-xs h-9 shadow-[0_0_15px_rgba(57,255,20,0.25)]">
+                <Shield className="w-4 h-4 mr-1.5" />
+                Cockpit Plein Écran
               </Button>
             </Link>
           )}
@@ -293,19 +322,26 @@ export function TradingHubTabs({ sessions, trades, stats }: TradingHubTabsProps)
 
             <Card className="bg-[#141414] border-white/10 p-6 space-y-4 flex flex-col justify-between">
               <div className="space-y-2">
-                <h3 className="text-sm font-bold text-white">Accéder aux Calculateurs Futures</h3>
+                <h3 className="text-sm font-bold text-white">Prop Firm Drawdown Guardian</h3>
                 <p className="text-xs text-neutral-400 leading-relaxed">
-                  Utilisez les calculateurs de risque basés sur les ticks et la gestion du drawdown Prop Firm dans l'onglet Systèmes.
+                  Surveillez votre Trailing Drawdown, testez votre survie aux pertes et calibrez vos contrats Mini vs Micro.
                 </p>
               </div>
 
-              <Link href="/systems">
-                <Button className="w-full bg-white text-black hover:bg-neutral-200 text-xs font-bold">
-                  Ouvrir OPAL Systems
+              <Link href="/trading/prop-firm-guardian">
+                <Button className="w-full bg-[#39FF14] text-black hover:bg-[#39FF14]/90 text-xs font-bold shadow-[0_0_15px_rgba(57,255,20,0.2)]">
+                  Ouvrir le Guardian & Drawdown
                 </Button>
               </Link>
             </Card>
           </div>
+        </div>
+      )}
+
+      {/* TAB 4: GUARDIAN */}
+      {activeTab === 'guardian' && (
+        <div className="space-y-6">
+          <PropFirmGuardianView accounts={accounts} />
         </div>
       )}
     </div>

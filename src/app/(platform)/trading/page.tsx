@@ -20,14 +20,22 @@ export default async function TradingHubPage() {
 
   const sessions = (sessionsData || []) as WorkspaceSession[];
 
-  // Fetch user's trades
-  const { data: tradesData } = await supabase
-    .from('trades')
-    .select('*')
-    .eq('user_id', user?.id || '')
-    .order('trade_date', { ascending: false });
+  // Fetch user's trades & prop firm accounts in parallel
+  const [tradesRes, accountsRes] = await Promise.all([
+    supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', user?.id || '')
+      .order('trade_date', { ascending: false }),
+    supabase
+      .from('prop_firm_accounts')
+      .select('*')
+      .eq('user_id', user?.id || '')
+      .order('created_at', { ascending: false }),
+  ]);
 
-  const trades = (tradesData || []) as Trade[];
+  const trades = (tradesRes.data || []) as Trade[];
+  const accounts = (accountsRes.data || []) as any[];
 
   // Compute stats
   const totalTrades = trades.length;
@@ -71,8 +79,8 @@ export default async function TradingHubPage() {
         </div>
       </div>
 
-      {/* Main Tabs Segment: Sessions, Journal, Stats & Integrated Calendar */}
-      <TradingHubTabs sessions={sessions} trades={trades} stats={stats} />
+      {/* Main Tabs Segment: Sessions, Journal, Stats, Guardian & Integrated Calendar */}
+      <TradingHubTabs sessions={sessions} trades={trades} stats={stats} accounts={accounts} />
     </div>
   );
 }
