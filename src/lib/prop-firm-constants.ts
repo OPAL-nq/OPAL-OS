@@ -260,12 +260,10 @@ export function calculateGuardianMetrics(
   const profitTarget = account.profit_target ? Number(account.profit_target) : null;
 
   // Trailing threshold calculation
-  // For standard trailing, threshold moves up with High Water Mark
   let liquidationThreshold = highWaterMark - drawdownLimit;
 
-  // If Apex or similar lock-at-starting-balance logic applies once in buffer
+  // If Apex: stops trailing once threshold reaches Starting Balance + $100
   if (account.firm_name === 'apex') {
-    // Apex stops trailing once threshold reaches Starting Balance + $100
     const apexThresholdCap = startingBalance + 100;
     if (liquidationThreshold > apexThresholdCap) {
       liquidationThreshold = apexThresholdCap;
@@ -336,12 +334,12 @@ export function calculateGuardianMetrics(
 }
 
 /**
- * Compares exact contract sizing for Mini (NQ/ES) vs Micro (MNQ/MES)
- * based on stop loss in points/ticks and dollar risk.
+ * Native TICKS Position Sizing Engine for CME Futures (NQ / MNQ / ES / MES).
+ * All risk and contract calculations are strictly driven by TICKS.
  */
 export function calculateSizingComparison(
   selectedInstrument: 'NQ' | 'MNQ' | 'ES' | 'MES',
-  stopLossPoints: number,
+  stopLossTicks: number,
   riskDollars: number,
   accountBuffer: number
 ): SizingRecommendation {
@@ -352,19 +350,19 @@ export function calculateSizingComparison(
   const miniSpec = INSTRUMENTS[miniKey];
   const microSpec = INSTRUMENTS[microKey];
 
-  const safePoints = Math.max(0.25, stopLossPoints);
-  const stopLossTicks = safePoints / miniSpec.tickSize;
+  const safeTicks = Math.max(1, Math.round(stopLossTicks));
+  const stopLossPoints = safeTicks * miniSpec.tickSize;
 
-  // Mini calculation
-  const miniRiskPerContract = safePoints * miniSpec.pointValue;
+  // Mini calculation (Ticks * Tick Value)
+  const miniRiskPerContract = safeTicks * miniSpec.tickValue;
   const miniRaw = miniRiskPerContract > 0 ? riskDollars / miniRiskPerContract : 0;
   const miniContracts = Math.floor(miniRaw);
   const miniGrossLoss = miniContracts * miniRiskPerContract;
   const miniCommissions = miniContracts * COMMISSIONS.MINI_ROUNDTRIP;
   const miniRiskTotal = miniGrossLoss + miniCommissions;
 
-  // Micro calculation
-  const microRiskPerContract = safePoints * microSpec.pointValue;
+  // Micro calculation (Ticks * Tick Value)
+  const microRiskPerContract = safeTicks * microSpec.tickValue;
   const microRaw = microRiskPerContract > 0 ? riskDollars / microRiskPerContract : 0;
   const microContracts = Math.floor(microRaw);
   const microGrossLoss = microContracts * microRiskPerContract;
@@ -377,19 +375,19 @@ export function calculateSizingComparison(
 
   if (miniContracts === 0) {
     recommendedCategory = 'Micro';
-    recommendationReason = `Le risque de ${riskDollars} $ est trop serré pour 1 contrat Mini ${miniKey} (1 contrat Mini risquerait ${miniRiskPerContract.toFixed(0)} $). Utilise ${microContracts} contrat(s) Micro ${microKey} pour un calibrage précis.`;
+    recommendationReason = `À ${riskDollars} $ de risque pour un SL de ${safeTicks} ticks, 1 contrat Mini ${miniKey} risquerait ${miniRiskPerContract.toFixed(0)} $ (trop élevé). Utilise ${microContracts} contrat(s) Micro ${microKey} pour respecter précisément ton risque.`;
   } else if (accountBuffer < riskDollars * 4) {
     recommendedCategory = 'Micro';
-    recommendationReason = `Ton buffer de sécurité (${accountBuffer.toFixed(0)} $) est sous tension (< 4R). Les Micros (${microKey}) te permettent d'ajuster plus finement ton risque par paliers de ${microRiskPerContract.toFixed(0)} $.`;
+    recommendationReason = `Ton buffer de sécurité (${accountBuffer.toFixed(0)} $) est sous tension (< 4R). Les Micros (${microKey}) te permettent de calibrer ton risque au tick près par tranche de ${microRiskPerContract.toFixed(0)} $.`;
   } else if (miniContracts >= 1) {
     recommendedCategory = 'Mini';
-    recommendationReason = `Ton buffer est confortable (> 4R). Tu peux intervenir avec ${miniContracts} contrat(s) Mini ${miniKey} ou ${microContracts} Micro(s) ${microKey}.`;
+    recommendationReason = `Ton buffer est confortable (> 4R). Tu peux intervenir avec ${miniContracts} contrat(s) Mini ${miniKey} (${miniGrossLoss.toFixed(0)} $) ou ${microContracts} Micro(s) ${microKey}.`;
   }
 
   return {
     instrument: selectedInstrument,
-    stopLossPoints: safePoints,
-    stopLossTicks,
+    stopLossPoints: Math.round(stopLossPoints * 100) / 100,
+    stopLossTicks: safeTicks,
     riskDollars,
     miniContracts,
     miniRiskTotal: Math.round(miniRiskTotal * 100) / 100,
@@ -399,37 +397,5 @@ export function calculateSizingComparison(
     microCommissions: Math.round(microCommissions * 100) / 100,
     recommendedCategory,
     recommendationReason,
-  };
-}
-
-/**
- * Analyzes consistency rule limits (e.g. 30%, 40%, 50% max profit per day).
- */
-export function calculateConsistencyAnalysis(
-  totalProfit: number,
-  bestDayProfit: number,
-  consistencyPct: number = 30
-) {
-  const safeTotal = Math.max(0, totalProfit);
-  const safeBestDay = Math.max(0, bestDayProfit);
-  const safePct = Math.max(1, consistencyPct) / 100;
-
-  const currentBestDayShare = safeTotal > 0 ? (safeBestDay / safeTotal) * 100 : 0;
-  const isViolating = currentBestDayShare > consistencyPct;
-
-  // Total profit needed so that best day is exactly consistencyPct of total
-  // bestDay = totalNeeded * safePct => totalNeeded = bestDay / safePct
-  const requiredTotalProfit = safePct > 0 ? safeBestDay / safePct : safeTotal;
-  const additionalProfitNeeded = Math.max(0, requiredTotalProfit - safeTotal);
-
-  // Maximum allowed profit on a single day without exceeding rule for current total profit
-  const maxAllowedSingleDay = safeTotal * safePct;
-
-  return {
-    currentBestDayShare: Math.round(currentBestDayShare * 10) / 10,
-    isViolating,
-    requiredTotalProfit: Math.round(requiredTotalProfit),
-    additionalProfitNeeded: Math.round(additionalProfitNeeded),
-    maxAllowedSingleDay: Math.round(maxAllowedSingleDay),
   };
 }

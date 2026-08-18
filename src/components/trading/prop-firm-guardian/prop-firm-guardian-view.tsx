@@ -7,21 +7,15 @@ import {
   AlertTriangle,
   CheckCircle2,
   TrendingUp,
-  Flame,
-  ArrowRight,
   Plus,
-  RefreshCw,
   Edit,
   Trash2,
   Copy,
   Check,
   Sparkles,
-  Sliders,
   DollarSign,
-  Layers,
   Scale,
   Zap,
-  HelpCircle,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -32,7 +26,6 @@ import { deletePropFirmAccount } from '@/app/actions/prop-firm';
 import {
   calculateGuardianMetrics,
   calculateSizingComparison,
-  calculateConsistencyAnalysis,
 } from '@/lib/prop-firm-constants';
 import { INSTRUMENTS } from '@/lib/trading-constants';
 import { cn } from '@/lib/utils';
@@ -54,13 +47,7 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
   // Simulator Risk Parameters
   const [riskDollars, setRiskDollars] = useState<number>(250);
   const [selectedInstrument, setSelectedInstrument] = useState<'NQ' | 'MNQ' | 'ES' | 'MES'>('MNQ');
-  const [stopLossPoints, setStopLossPoints] = useState<number>(20);
-
-  // Trailing Simulation Delta ($)
-  const [simulatedPnl, setSimulatedPnl] = useState<number>(0);
-
-  // Consistency Simulator State
-  const [consistencyDayProfit, setConsistencyDayProfit] = useState<number>(850);
+  const [stopLossTicks, setStopLossTicks] = useState<number>(80);
 
   // Copy state
   const [copiedSizing, setCopiedSizing] = useState(false);
@@ -82,49 +69,26 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
     ? calculateGuardianMetrics(selectedAccount, riskDollars)
     : null;
 
-  // Simulated Metrics
-  const simulatedAccount: PropFirmAccount | null = selectedAccount
-    ? {
-        ...selectedAccount,
-        current_balance: Number(selectedAccount.current_balance) + simulatedPnl,
-        high_water_mark: Math.max(
-          Number(selectedAccount.high_water_mark),
-          Number(selectedAccount.current_balance) + simulatedPnl
-        ),
-      }
-    : null;
-
-  const simulatedMetrics = simulatedAccount
-    ? calculateGuardianMetrics(simulatedAccount, riskDollars)
-    : null;
-
-  // Sizing Recommendation
+  // Sizing Recommendation (Pure Ticks)
   const bufferForSizing = metrics ? metrics.bufferDollars : 2000;
   const sizing = calculateSizingComparison(
     selectedInstrument,
-    stopLossPoints,
+    stopLossTicks,
     riskDollars,
     bufferForSizing
   );
 
-  // Consistency Analysis
-  const consistencyPct = selectedAccount?.consistency_rule_pct || 30;
-  const totalProfitForConsistency = Math.max(
-    0,
-    (selectedAccount ? Number(selectedAccount.current_balance) - Number(selectedAccount.starting_balance) : 0) +
-      (simulatedPnl > 0 ? simulatedPnl : 0)
-  );
-  const consistency = calculateConsistencyAnalysis(
-    totalProfitForConsistency,
-    consistencyDayProfit,
-    consistencyPct
-  );
-
   const handleCopySizing = () => {
     const isMicro = sizing.recommendedCategory === 'Micro';
-    const text = `${isMicro ? sizing.microContracts : sizing.miniContracts} contrat(s) ${
-      isMicro ? (selectedInstrument === 'ES' || selectedInstrument === 'MES' ? 'MES' : 'MNQ') : (selectedInstrument === 'ES' || selectedInstrument === 'MES' ? 'ES' : 'NQ')
-    } • SL ${sizing.stopLossPoints} pts (${sizing.stopLossTicks} ticks) • Risque: ~${isMicro ? sizing.microRiskTotal : sizing.miniRiskTotal} $`;
+    const activeSymbol = isMicro
+      ? selectedInstrument === 'ES' || selectedInstrument === 'MES'
+        ? 'MES'
+        : 'MNQ'
+      : selectedInstrument === 'ES' || selectedInstrument === 'MES'
+      ? 'ES'
+      : 'NQ';
+
+    const text = `${isMicro ? sizing.microContracts : sizing.miniContracts} contrat(s) ${activeSymbol} • SL ${sizing.stopLossTicks} ticks (${sizing.stopLossPoints} pts) • Risque: ~${isMicro ? sizing.microRiskTotal : sizing.miniRiskTotal} $`;
     navigator.clipboard.writeText(text);
     setCopiedSizing(true);
     setTimeout(() => setCopiedSizing(false), 2000);
@@ -140,10 +104,10 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
 
           <div className="space-y-2 max-w-lg mx-auto">
             <h2 className="text-xl sm:text-2xl font-black text-white">
-              Prop Firm Drawdown Guardian & Simulateur
+              Prop Firm Drawdown Guardian
             </h2>
             <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
-              Sécurisez vos comptes financés (Topstep, Apex, MFFU, Bulenox, TradeDay).
+              Sécurisez vos évaluations et comptes financés (Topstep, Apex, MFFU, Bulenox, TradeDay).
               Calculez au tick près votre buffer de liquidation, le nombre de Stop Loss tolérables et la taille exacte de position (Micro vs Mini).
             </p>
           </div>
@@ -459,7 +423,7 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
                     </span>
                   </div>
                   <p className="text-[11px] text-neutral-500">
-                    À {riskDollars} $ / trade, ton compte peut absorber {metrics.tolerableConsecutiveLosses} échecs complets avant liquidation.
+                    À {riskDollars} $ / trade, ton compte peut absorber {metrics.tolerableConsecutiveLosses} échecs complets consécutifs avant liquidation.
                   </p>
                 </div>
 
@@ -478,20 +442,20 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
         </div>
       )}
 
-      {/* Module 2: Position Sizing Engine (Mini vs Micro NQ / MNQ / ES / MES) */}
+      {/* Module 2: Position Sizing Engine Native in TICKS (Mini vs Micro NQ / MNQ / ES / MES) */}
       <Card className="bg-[#141414] border-white/10">
         <CardContent className="p-6 sm:p-7 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
             <div>
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#39FF14] mb-1">
                 <Zap className="w-4 h-4" />
-                <span>Calculateur de Taille de Position & Calibrage CME</span>
+                <span>Calculateur de Taille de Position au Tick Près (CME Futures)</span>
               </div>
               <h3 className="text-lg font-black text-white">
-                Arbitrage Intelligent : Contrats Mini vs Micro
+                Calibrage Exact : Contrats Mini vs Micro
               </h3>
               <p className="text-xs text-neutral-400 mt-0.5">
-                Calculez le nombre de contrats exact au tick près sans risquer de sur-leveraging destructeur.
+                Calculez le nombre de contrats optimal en fonction de votre Stop Loss en ticks et de votre tolérance de risque.
               </p>
             </div>
 
@@ -508,13 +472,13 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
               ) : (
                 <>
                   <Copy className="w-3.5 h-3.5 mr-1.5" />
-                  <span>Copier les paramètres du trade</span>
+                  <span>Copier la taille du trade</span>
                 </>
               )}
             </Button>
           </div>
 
-          {/* Sizing Parameters Row */}
+          {/* Sizing Parameters Row (Native in Ticks) */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {/* Instrument */}
             <div className="space-y-1.5">
@@ -549,38 +513,38 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
               </div>
             </div>
 
-            {/* Stop Loss in Points */}
+            {/* Stop Loss in Ticks (Natively) */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between text-xs">
                 <label className="font-semibold text-neutral-300">
-                  Distance du Stop Loss (Points)
+                  Stop Loss en TICKS
                 </label>
                 <span className="font-mono text-neutral-400 text-[11px]">
-                  = {sizing.stopLossTicks} ticks
+                  = {sizing.stopLossPoints} pts
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Input
                   type="number"
-                  step="0.25"
-                  value={stopLossPoints}
-                  onChange={(e) => setStopLossPoints(Math.max(0.25, Number(e.target.value)))}
+                  step="1"
+                  value={stopLossTicks}
+                  onChange={(e) => setStopLossTicks(Math.max(1, Math.round(Number(e.target.value))))}
                   className="bg-[#0A0A0A] border-white/10 text-white text-xs h-9 font-mono"
                 />
                 <div className="flex gap-1">
-                  {[10, 15, 20, 30].map((pts) => (
+                  {[40, 60, 80, 120, 160].map((tks) => (
                     <button
-                      key={pts}
+                      key={tks}
                       type="button"
-                      onClick={() => setStopLossPoints(pts)}
+                      onClick={() => setStopLossTicks(tks)}
                       className={cn(
                         'px-2 py-1 rounded text-[10px] font-mono font-bold border',
-                        stopLossPoints === pts
+                        stopLossTicks === tks
                           ? 'bg-[#39FF14]/20 border-[#39FF14] text-[#39FF14]'
                           : 'bg-white/5 border-white/10 text-neutral-400 hover:text-white'
                       )}
                     >
-                      {pts}p
+                      {tks}t
                     </button>
                   ))}
                 </div>
@@ -624,7 +588,7 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
                     {selectedInstrument === 'ES' || selectedInstrument === 'MES' ? 'MES (Micro S&P 500)' : 'MNQ (Micro Nasdaq)'}
                   </h4>
                   <span className="text-[11px] text-neutral-400">
-                    {selectedInstrument === 'ES' || selectedInstrument === 'MES' ? '5 $ / pt (1.25 $ / tick)' : '2 $ / pt (0.50 $ / tick)'}
+                    {selectedInstrument === 'ES' || selectedInstrument === 'MES' ? '1.25 $ / tick' : '0.50 $ / tick'}
                   </span>
                 </div>
                 <div className="text-right">
@@ -637,13 +601,13 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
 
               <div className="space-y-2 mt-4 text-xs">
                 <div className="flex items-center justify-between text-neutral-400">
-                  <span>Perte brute au Stop Loss :</span>
+                  <span>Perte brute au Stop Loss ({sizing.stopLossTicks} ticks) :</span>
                   <span className="font-mono font-bold text-white">
                     ${(sizing.microRiskTotal - sizing.microCommissions).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-neutral-400">
-                  <span>Frais & commissions CME estimés :</span>
+                  <span>Frais CME estimés :</span>
                   <span className="font-mono text-neutral-300">
                     +${sizing.microCommissions.toFixed(2)}
                   </span>
@@ -678,7 +642,7 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
                     {selectedInstrument === 'ES' || selectedInstrument === 'MES' ? 'ES (E-mini S&P 500)' : 'NQ (E-mini Nasdaq)'}
                   </h4>
                   <span className="text-[11px] text-neutral-400">
-                    {selectedInstrument === 'ES' || selectedInstrument === 'MES' ? '50 $ / pt (12.50 $ / tick)' : '20 $ / pt (5.00 $ / tick)'}
+                    {selectedInstrument === 'ES' || selectedInstrument === 'MES' ? '12.50 $ / tick' : '5.00 $ / tick'}
                   </span>
                 </div>
                 <div className="text-right">
@@ -691,13 +655,13 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
 
               <div className="space-y-2 mt-4 text-xs">
                 <div className="flex items-center justify-between text-neutral-400">
-                  <span>Perte brute au Stop Loss :</span>
+                  <span>Perte brute au Stop Loss ({sizing.stopLossTicks} ticks) :</span>
                   <span className="font-mono font-bold text-white">
                     ${(sizing.miniRiskTotal - sizing.miniCommissions).toFixed(2)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between text-neutral-400">
-                  <span>Frais & commissions CME estimés :</span>
+                  <span>Frais CME estimés :</span>
                   <span className="font-mono text-neutral-300">
                     +${sizing.miniCommissions.toFixed(2)}
                   </span>
@@ -719,169 +683,6 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
           </div>
         </CardContent>
       </Card>
-
-      {/* Module 3: Trailing Simulation & Consistency Rule */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Simulator: Interactive Trailing Drawdown Slider */}
-        <Card className="bg-[#141414] border-white/10 flex flex-col justify-between">
-          <CardContent className="p-6 space-y-5">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#39FF14]">
-                <Sliders className="w-4 h-4" />
-                <span>Simulateur Trailing Drawdown</span>
-              </div>
-              <h3 className="text-base font-bold text-white">
-                « Et si je fais +X $ ou -X $ sur ma séance ? »
-              </h3>
-              <p className="text-xs text-neutral-400">
-                Visualisez comment votre seuil de liquidation se déplace avec le High Water Mark.
-              </p>
-            </div>
-
-            {/* Slider */}
-            <div className="space-y-2 p-4 rounded-xl bg-black/40 border border-white/5">
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-neutral-400">Gain / Perte simulé :</span>
-                <span
-                  className={cn(
-                    'font-mono font-bold text-sm',
-                    simulatedPnl > 0
-                      ? 'text-[#39FF14]'
-                      : simulatedPnl < 0
-                      ? 'text-red-400'
-                      : 'text-neutral-300'
-                  )}
-                >
-                  {simulatedPnl > 0 ? `+${simulatedPnl} $` : `${simulatedPnl} $`}
-                </span>
-              </div>
-
-              <input
-                type="range"
-                min="-1500"
-                max="3000"
-                step="50"
-                value={simulatedPnl}
-                onChange={(e) => setSimulatedPnl(Number(e.target.value))}
-                className="w-full accent-[#39FF14] cursor-pointer"
-              />
-
-              <div className="flex justify-between text-[10px] text-neutral-500 font-mono">
-                <span>-1 500 $ (SL)</span>
-                <button
-                  type="button"
-                  onClick={() => setSimulatedPnl(0)}
-                  className="hover:text-white"
-                >
-                  Reset (0$)
-                </button>
-                <span>+3 000 $ (TP)</span>
-              </div>
-            </div>
-
-            {/* Projected Impact */}
-            {simulatedMetrics && (
-              <div className="grid grid-cols-3 gap-2.5 text-xs">
-                <div className="p-3 rounded-lg bg-black/60 border border-white/5 space-y-1">
-                  <span className="text-[10px] text-neutral-500 font-semibold uppercase block">
-                    Nouveau Solde
-                  </span>
-                  <span className="font-mono font-bold text-white">
-                    ${simulatedMetrics.currentBalance.toLocaleString('en-US')}
-                  </span>
-                </div>
-
-                <div className="p-3 rounded-lg bg-black/60 border border-white/5 space-y-1">
-                  <span className="text-[10px] text-red-400/80 font-semibold uppercase block">
-                    Nouveau Seuil
-                  </span>
-                  <span className="font-mono font-bold text-red-400">
-                    ${simulatedMetrics.liquidationThreshold.toLocaleString('en-US')}
-                  </span>
-                </div>
-
-                <div className="p-3 rounded-lg bg-black/60 border border-white/5 space-y-1">
-                  <span className="text-[10px] text-[#39FF14]/80 font-semibold uppercase block">
-                    Nouveau Buffer
-                  </span>
-                  <span className="font-mono font-bold text-[#39FF14]">
-                    +${simulatedMetrics.bufferDollars.toLocaleString('en-US')}
-                  </span>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Simulator: Consistency Rule Validator */}
-        <Card className="bg-[#141414] border-white/10 flex flex-col justify-between">
-          <CardContent className="p-6 space-y-5">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-purple-400">
-                <Scale className="w-4 h-4" />
-                <span>Règle de Cohérence (Consistency Rule)</span>
-              </div>
-              <h3 className="text-base font-bold text-white">
-                Vérificateur de Validation & Payout
-              </h3>
-              <p className="text-xs text-neutral-400">
-                Évitez le refus de paiement causé par un jour représentant plus de {consistencyPct}% de votre profit total.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <div className="p-3.5 rounded-xl bg-black/40 border border-white/5 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-neutral-400">Gain de votre meilleure séance ($) :</span>
-                  <span className="font-mono font-bold text-purple-300">
-                    ${consistencyDayProfit}
-                  </span>
-                </div>
-                <Input
-                  type="number"
-                  value={consistencyDayProfit}
-                  onChange={(e) => setConsistencyDayProfit(Math.max(0, Number(e.target.value)))}
-                  className="bg-[#0A0A0A] border-white/10 text-white text-xs h-8 font-mono"
-                />
-              </div>
-
-              <div className="p-4 rounded-xl bg-black/60 border border-white/10 space-y-2 text-xs">
-                <div className="flex items-center justify-between">
-                  <span className="text-neutral-400">Part de cette séance dans le profit total :</span>
-                  <span
-                    className={cn(
-                      'font-mono font-bold text-sm',
-                      consistency.isViolating ? 'text-amber-400' : 'text-[#39FF14]'
-                    )}
-                  >
-                    {consistency.currentBestDayShare}% / {consistencyPct}% max
-                  </span>
-                </div>
-
-                <div className="w-full h-2 rounded-full bg-white/5 overflow-hidden">
-                  <div
-                    className={cn(
-                      'h-full rounded-full transition-all',
-                      consistency.isViolating ? 'bg-amber-400' : 'bg-[#39FF14]'
-                    )}
-                    style={{ width: `${Math.min(100, (consistency.currentBestDayShare / consistencyPct) * 100)}%` }}
-                  />
-                </div>
-
-                {consistency.isViolating ? (
-                  <p className="text-[11px] text-amber-300 pt-1">
-                    ⚠️ <strong>Attention règle de cohérence :</strong> Pour valider votre paiement avec cette journée à {consistencyDayProfit} $, vous devez atteindre un profit total cumulé de <strong>{consistency.requiredTotalProfit} $</strong> (soit encore +{consistency.additionalProfitNeeded} $ de gains répartis sur d'autres séances).
-                  </p>
-                ) : (
-                  <p className="text-[11px] text-[#39FF14] pt-1">
-                    ✓ <strong>Règle respectée :</strong> Cette séance reste sous la limite des {consistencyPct}% du gain total requis.
-                  </p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 }

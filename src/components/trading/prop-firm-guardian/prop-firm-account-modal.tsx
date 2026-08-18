@@ -316,27 +316,11 @@ export function PropFirmAccountModal({
                   className="bg-[#0A0A0A] border-white/10 text-white text-xs h-9"
                 />
               </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-semibold text-neutral-300">
-                  Règle de Cohérence Max / Jour (%)
-                </label>
-                <Input
-                  type="number"
-                  value={consistencyRulePct}
-                  onChange={(e) => setConsistencyRulePct(e.target.value)}
-                  placeholder="ex: 30 (Apex PA), 40 (MFFU), 50 (Topstep)"
-                  className="bg-[#0A0A0A] border-white/10 text-white text-xs h-9"
-                />
-              </div>
-
-              <div className="space-y-1.5 flex flex-col justify-end">
                 <label className="text-xs font-semibold text-neutral-300 mb-2">
                   Mécanisme de Trailing
                 </label>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4 h-9">
                   <label className="inline-flex items-center gap-1.5 text-xs text-neutral-300 cursor-pointer">
                     <input
                       type="radio"
@@ -345,7 +329,7 @@ export function PropFirmAccountModal({
                       onChange={() => setIsTrailingEod(true)}
                       className="accent-[#39FF14]"
                     />
-                    <span>Trailing End-of-Day (EOD)</span>
+                    <span>Trailing EOD</span>
                   </label>
                   <label className="inline-flex items-center gap-1.5 text-xs text-neutral-300 cursor-pointer">
                     <input
@@ -355,7 +339,7 @@ export function PropFirmAccountModal({
                       onChange={() => setIsTrailingEod(false)}
                       className="accent-[#39FF14]"
                     />
-                    <span>Trailing Intraday (Temps réel)</span>
+                    <span>Trailing Live</span>
                   </label>
                 </div>
               </div>
