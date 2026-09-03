@@ -21,25 +21,28 @@ export default async function AcademyPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Fetch published modules with their published lessons
-  const { data: modulesData } = await supabase
-    .from('modules')
-    .select('*, lessons(*)')
-    .eq('published', true)
-    .order('position', { ascending: true });
+  const [modulesRes, progressRes] = await Promise.all([
+    supabase
+      .from('modules')
+      .select('*, lessons(*)')
+      .eq('published', true)
+      .order('position', { ascending: true }),
+    user
+      ? supabase
+          .from('lesson_progress')
+          .select('lesson_id, completed')
+          .eq('user_id', user.id)
+          .eq('completed', true)
+      : Promise.resolve({ data: [] }),
+  ]);
+
+  const modulesData = modulesRes.data;
+  const progressData = progressRes.data;
 
   // Fetch current user's lesson progress
   let progressMap = new Set<string>();
-  if (user) {
-    const { data: progressData } = await supabase
-      .from('lesson_progress')
-      .select('lesson_id, completed')
-      .eq('user_id', user.id)
-      .eq('completed', true);
-
-    if (progressData) {
-      progressData.forEach((p) => progressMap.add(p.lesson_id));
-    }
+  if (progressData) {
+    progressData.forEach((p) => progressMap.add(p.lesson_id));
   }
 
   const rawModules = (modulesData || []) as (Module & { lessons: Lesson[] })[];

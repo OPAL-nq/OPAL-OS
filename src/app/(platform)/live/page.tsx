@@ -29,27 +29,19 @@ export default async function LiveHubPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Check if admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user?.id || '')
-    .single();
+  const [profileRes, livesRes, replaysRes] = await Promise.all([
+    user
+      ? supabase.from('profiles').select('role').eq('id', user.id).single()
+      : Promise.resolve({ data: null }),
+    supabase.from('lives').select('*').order('scheduled_at', { ascending: true }),
+    supabase.from('live_replays').select('*, live:live_id(*)').order('created_at', { ascending: false }).limit(6),
+  ]);
 
-  const isAdmin = profile?.role === 'admin';
+  const isAdmin = profileRes.data?.role === 'admin';
 
-  // Query upcoming lives
-  let query = supabase
-    .from('lives')
-    .select('*')
-    .order('scheduled_at', { ascending: true });
-
-  if (!isAdmin) {
-    query = query.eq('published', true);
-  }
-
-  const { data: livesData } = await query;
-  const allLives = (livesData || []) as LiveSession[];
+  // Filter lives
+  const rawLives = (livesRes.data || []) as LiveSession[];
+  const allLives = isAdmin ? rawLives : rawLives.filter((l) => l.published);
 
   // Find next active live (live in progress or nearest upcoming scheduled)
   const activeLive = allLives.find((l) => l.status === 'live');
@@ -61,18 +53,9 @@ export default async function LiveHubPage() {
     (l) => l.id !== nextLive?.id && l.status !== 'ended' && l.status !== 'cancelled'
   );
 
-  // Query recent replays
-  let replaysQuery = supabase
-    .from('live_replays')
-    .select('*, live:live_id(*)')
-    .order('created_at', { ascending: false })
-    .limit(3);
-
-  if (!isAdmin) {
-    replaysQuery = replaysQuery.eq('published', true);
-  }
-
-  const { data: replaysData } = await replaysQuery;
+  // Filter replays
+  const rawReplays = (replaysRes.data || []) as LiveReplay[];
+  const replaysData = (isAdmin ? rawReplays : rawReplays.filter((r) => r.published)).slice(0, 3);
   const recentReplays = (replaysData || []) as LiveReplay[];
 
   const liveDiscordUrl = nextLive?.stream_url || DEFAULT_DISCORD_LIVE_URL;

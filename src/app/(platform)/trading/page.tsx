@@ -13,10 +13,11 @@ export default async function TradingHubPage() {
 
   let trades: Trade[] = [];
   let accounts: any[] = [];
-  const todayProtocolData = await getTodayProtocol();
+  let todayProtocolData: any = null;
 
   try {
-    const [tradesRes, accountsRes] = await Promise.allSettled([
+    const [protocolRes, tradesRes, accountsRes] = await Promise.allSettled([
+      getTodayProtocol(),
       supabase
         .from('trades')
         .select('*')
@@ -29,6 +30,9 @@ export default async function TradingHubPage() {
         .order('created_at', { ascending: false }),
     ]);
 
+    if (protocolRes.status === 'fulfilled') {
+      todayProtocolData = protocolRes.value;
+    }
     if (tradesRes.status === 'fulfilled' && tradesRes.value.data) {
       trades = tradesRes.value.data as Trade[];
     }

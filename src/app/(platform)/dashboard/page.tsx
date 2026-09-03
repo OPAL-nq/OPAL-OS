@@ -34,41 +34,97 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser();
 
-  let profile: Profile | null = null;
-  if (user) {
-    const { data } = await supabase
+  if (!user) {
+    return null;
+  }
+
+  const now = new Date().toISOString();
+
+  // ----------------------------------------------------
+  // Ultra-Fast Parallelized Data Fetching (Zero Waterfalls)
+  // ----------------------------------------------------
+  const [
+    profileRes,
+    modulesRes,
+    progressRes,
+    tradesRes,
+    lastTradeRes,
+    livesRes,
+    notifRes,
+    msgRes,
+    sessRes,
+    fupRes,
+    todayProtocolData,
+  ] = await Promise.all([
+    supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
-      .single();
-    profile = data;
-  }
-
-  const firstName = profile?.full_name?.split(' ')[0] || 'Trader';
-
-  // ----------------------------------------------------
-  // 1. Dynamic Academy Progress Calculation
-  // ----------------------------------------------------
-  const { data: modulesData } = await supabase
-    .from('modules')
-    .select('*, lessons(*)')
-    .eq('published', true)
-    .order('position', { ascending: true });
-
-  let progressMap = new Set<string>();
-  if (user) {
-    const { data: progressData } = await supabase
+      .single(),
+    supabase
+      .from('modules')
+      .select('*, lessons(*)')
+      .eq('published', true)
+      .order('position', { ascending: true }),
+    supabase
       .from('lesson_progress')
       .select('lesson_id, completed')
       .eq('user_id', user.id)
-      .eq('completed', true);
+      .eq('completed', true),
+    supabase
+      .from('trades')
+      .select('pnl_r, pnl_dollars')
+      .eq('user_id', user.id),
+    supabase
+      .from('trades')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('trade_date', { ascending: false })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('lives')
+      .select('*')
+      .in('status', ['live', 'scheduled'])
+      .eq('published', true)
+      .order('scheduled_at', { ascending: true }),
+    supabase
+      .from('notifications')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', user.id)
+      .eq('read', false),
+    supabase
+      .from('community_messages')
+      .select('id, content, created_at, user_id, profiles:user_id(full_name), community_channels:channel_id(name, slug)')
+      .order('created_at', { ascending: false })
+      .limit(3),
+    supabase
+      .from('coaching_sessions')
+      .select('*')
+      .eq('client_id', user.id)
+      .eq('status', 'scheduled')
+      .gte('scheduled_at', now)
+      .order('scheduled_at', { ascending: true })
+      .limit(1)
+      .maybeSingle(),
+    supabase
+      .from('intensive_follow_ups')
+      .select('*')
+      .eq('user_id', user.id)
+      .maybeSingle(),
+    getTodayProtocol(),
+  ]);
 
-    if (progressData) {
-      progressData.forEach((p) => progressMap.add(p.lesson_id));
-    }
+  const profile: Profile | null = profileRes.data || null;
+  const firstName = profile?.full_name?.split(' ')[0] || 'Trader';
+
+  // 1. Academy Progress Calculation
+  const progressMap = new Set<string>();
+  if (progressRes.data) {
+    progressRes.data.forEach((p) => progressMap.add(p.lesson_id));
   }
 
-  const rawModules = (modulesData || []) as (Module & { lessons: Lesson[] })[];
+  const rawModules = (modulesRes.data || []) as (Module & { lessons: Lesson[] })[];
   const allPublishedLessons: (Lesson & { moduleTitle: string })[] = [];
 
   rawModules.forEach((m) => {
@@ -88,7 +144,6 @@ export default async function DashboardPage() {
   const academyProgressPercent =
     totalLessons > 0 ? Math.round((completedLessons / totalLessons) * 100) : 0;
 
-  // First non-completed lesson to resume
   const nextLessonToWatch = allPublishedLessons.find(
     (l) => !progressMap.has(l.id)
   );
@@ -96,131 +151,35 @@ export default async function DashboardPage() {
   const isAcademyFinished =
     totalLessons > 0 && completedLessons === totalLessons;
 
-  // ----------------------------------------------------
-  // 2. Dynamic Trading Performance Stats & Last Trade
-  // ----------------------------------------------------
+  // 2. Trading Stats Calculation
   let totalTrades = 0;
   let winRate = 0;
   let totalR = 0;
   let totalPnl = 0;
-  let lastTrade: any = null;
 
-  if (user) {
-    const [tradesRes, lastTradeRes] = await Promise.all([
-      supabase
-        .from('trades')
-        .select('pnl_r, pnl_dollars')
-        .eq('user_id', user.id),
-      supabase
-        .from('trades')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('trade_date', { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-    ]);
-
-    if (tradesRes.data && tradesRes.data.length > 0) {
-      totalTrades = tradesRes.data.length;
-      const winCount = tradesRes.data.filter((t) => Number(t.pnl_r) > 0).length;
-      winRate = Math.round((winCount / totalTrades) * 100);
-      totalR = tradesRes.data.reduce((acc, t) => acc + (Number(t.pnl_r) || 0), 0);
-      totalPnl = tradesRes.data.reduce((acc, t) => acc + (Number(t.pnl_dollars) || 0), 0);
-    }
-
-    lastTrade = lastTradeRes.data || null;
+  if (tradesRes.data && tradesRes.data.length > 0) {
+    totalTrades = tradesRes.data.length;
+    const winCount = tradesRes.data.filter((t) => Number(t.pnl_r) > 0).length;
+    winRate = Math.round((winCount / totalTrades) * 100);
+    totalR = tradesRes.data.reduce((acc, t) => acc + (Number(t.pnl_r) || 0), 0);
+    totalPnl = tradesRes.data.reduce((acc, t) => acc + (Number(t.pnl_dollars) || 0), 0);
   }
 
-  // ----------------------------------------------------
-  // 3. Dynamic Live Sessions Query
-  // ----------------------------------------------------
-  let nextLive: any = null;
-  const { data: activeLiveData } = await supabase
-    .from('lives')
-    .select('*')
-    .eq('status', 'live')
-    .eq('published', true)
-    .order('scheduled_at', { ascending: true })
-    .limit(1)
-    .maybeSingle();
+  const lastTrade = lastTradeRes.data || null;
 
-  if (activeLiveData) {
-    nextLive = activeLiveData;
-  } else {
-    const { data: upcomingLiveData } = await supabase
-      .from('lives')
-      .select('*')
-      .eq('status', 'scheduled')
-      .eq('published', true)
-      .order('scheduled_at', { ascending: true })
-      .limit(1)
-      .maybeSingle();
+  // 3. Live Sessions Selection (pick ongoing live or closest scheduled)
+  const allLives = (livesRes.data || []) as any[];
+  const nextLive = allLives.find((l) => l.status === 'live') || allLives.find((l) => l.status === 'scheduled') || null;
 
-    if (upcomingLiveData) {
-      nextLive = upcomingLiveData;
-    }
-  }
+  // 4. Notifications & Community
+  const unreadNotifsCount = notifRes.count || 0;
+  const recentMessages = (msgRes.data || []) as any[];
 
-  // ----------------------------------------------------
-  // 4. Dynamic Community & Notifications Preview
-  // ----------------------------------------------------
-  let unreadNotifsCount = 0;
-  let recentMessages: any[] = [];
-
-  if (user) {
-    const [notifRes, msgRes] = await Promise.all([
-      supabase
-        .from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', user.id)
-        .eq('read', false),
-      supabase
-        .from('community_messages')
-        .select('id, content, created_at, user_id, profiles:user_id(full_name), community_channels:channel_id(name, slug)')
-        .order('created_at', { ascending: false })
-        .limit(3),
-    ]);
-
-    unreadNotifsCount = notifRes.count || 0;
-    recentMessages = (msgRes.data || []) as any[];
-  }
-
-  // ----------------------------------------------------
-  // 5. Dynamic Intensive Data Query (ONLY for Intensive members)
-  // ----------------------------------------------------
-  let intensiveData: {
-    nextSession: any;
-    followUp: any;
-  } | null = null;
-
-  if (profile?.plan === 'intensive' && user) {
-    const now = new Date().toISOString();
-    const [sessRes, fupRes] = await Promise.all([
-      supabase
-        .from('coaching_sessions')
-        .select('*')
-        .eq('client_id', user.id)
-        .eq('status', 'scheduled')
-        .gte('scheduled_at', now)
-        .order('scheduled_at', { ascending: true })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from('intensive_follow_ups')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle(),
-    ]);
-    intensiveData = {
-      nextSession: sessRes.data || null,
-      followUp: fupRes.data || null,
-    };
-  }
-
-  // ----------------------------------------------------
-  // 6. Dynamic Daily Protocol & Streaks Query
-  // ----------------------------------------------------
-  const todayProtocolData = await getTodayProtocol();
+  // 5. Intensive Data (Only active for Intensive members)
+  const intensiveData = profile?.plan === 'intensive' ? {
+    nextSession: sessRes.data || null,
+    followUp: fupRes.data || null,
+  } : null;
 
   return (
     <div className="max-w-7xl mx-auto space-y-8 pb-12">

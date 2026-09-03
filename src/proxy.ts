@@ -68,65 +68,46 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // 5. Fetch user profile for role/plan checks
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // 7. Role & plan verification ONLY for restricted routes (admin / intensive)
+  // This avoids redundant database roundtrips on standard platform routes (dashboard, trading, etc.)
+  const isAdminRoute = adminRoutes.some((route) => pathname.startsWith(route));
+  const isIntensiveRoute = intensiveRoutes.some((route) => pathname.startsWith(route));
 
-  let profile: any = null;
-  if (supabaseUrl && supabaseAnonKey) {
-    try {
-      const supabase = createServerClient(
-        supabaseUrl,
-        supabaseAnonKey,
-        {
+  if (isAdminRoute || isIntensiveRoute) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+    if (supabaseUrl && supabaseAnonKey) {
+      try {
+        const supabase = createServerClient(supabaseUrl, supabaseAnonKey, {
           cookies: {
             getAll() {
               return request.cookies.getAll();
             },
             setAll() {},
           },
+        });
+
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("role, plan, status")
+          .eq("id", user.id)
+          .single();
+
+        if (isAdminRoute && (!profile || profile.role !== "admin")) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/dashboard";
+          return NextResponse.redirect(url);
         }
-      );
 
-      const { data } = await supabase
-        .from("profiles")
-        .select("role, plan, status")
-        .eq("id", user.id)
-        .single();
-      profile = data;
-    } catch {
-      profile = null;
-    }
-  }
-
-  // 6. Admin route protection
-  if (adminRoutes.some((route) => pathname.startsWith(route))) {
-    if (!profile || profile.role !== "admin") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/dashboard";
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // 7. Intensive route protection
-  if (intensiveRoutes.some((route) => pathname.startsWith(route))) {
-    if (!profile || (profile.plan !== "intensive" && profile.role !== "admin")) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/intensive";
-      return NextResponse.redirect(url);
-    }
-  }
-
-  // 8. Check if account is active
-  if (profile && profile.status !== "active") {
-    // Inactive users can only access login/signup
-    if (
-      !pathname.startsWith("/login") &&
-      !pathname.startsWith("/signup")
-    ) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      return NextResponse.redirect(url);
+        if (isIntensiveRoute && (!profile || (profile.plan !== "intensive" && profile.role !== "admin"))) {
+          const url = request.nextUrl.clone();
+          url.pathname = "/intensive";
+          return NextResponse.redirect(url);
+        }
+      } catch {
+        // Fallback safely to non-blocking response
+      }
     }
   }
 

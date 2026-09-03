@@ -42,11 +42,10 @@ export async function login(
   }
 
   if (data?.user) {
-    try {
-      await syncUserWhopMembership(data.user.id, email);
-    } catch (syncErr) {
+    // Non-blocking background sync so user redirects instantly without lag
+    syncUserWhopMembership(data.user.id, email).catch((syncErr) => {
       console.warn('Background Whop sync warning on login:', syncErr);
-    }
+    });
   }
 
   redirect(redirectTo);
