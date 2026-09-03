@@ -6,7 +6,7 @@ import { createServerClient } from "@supabase/ssr";
 const authRoutes = ["/login", "/signup", "/forgot-password"];
 
 // Public routes — accessible by anyone without authentication
-const publicRoutes = ["/checkout"];
+const publicRoutes = ["/", "/mentorat", "/checkout"];
 
 // Routes that require admin role
 const adminRoutes = ["/admin"];
@@ -25,11 +25,14 @@ export async function proxy(request: NextRequest) {
   // 1. Refresh the Supabase session (token refresh)
   const { user, supabaseResponse } = await updateSession(request);
 
-  // 2. Root route: redirect logged in users to dashboard, unauthenticated to checkout
+  // 2. Root route: redirect logged-in members to dashboard, let visitors view the landing page
   if (pathname === "/") {
-    const url = request.nextUrl.clone();
-    url.pathname = user ? "/dashboard" : "/checkout";
-    return NextResponse.redirect(url);
+    if (user) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
+    return supabaseResponse;
   }
 
   // 3. Auth routes — allow access, redirect to dashboard if already logged in
