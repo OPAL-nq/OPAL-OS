@@ -6,7 +6,12 @@ import { createServerClient } from "@supabase/ssr";
 const authRoutes = ["/login", "/signup", "/forgot-password"];
 
 // Public routes — accessible by anyone without authentication
-const publicRoutes = ["/", "/mentorat", "/checkout"];
+const publicRoutes = [
+  "/",
+  "/mentorat",
+  "/checkout",
+  "/.well-known/apple-developer-merchantid-domain-association",
+];
 
 // Routes that require admin role
 const adminRoutes = ["/admin"];
@@ -137,6 +142,6 @@ export const config = {
      * - favicon.ico, sitemap.xml, robots.txt
      * - public assets (images, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|images/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|images/|\\.well-known).*)",
   ],
 };
