@@ -58,40 +58,99 @@ export function DailyProtocolWidget({
   const handleToggleStep = async (
     stepKey: 'pre_market_done' | 'session_rules_done' | 'journaling_done' | 'mental_close_done'
   ) => {
-    try {
-      setIsUpdating(true);
-      const nextVal = !protocol[stepKey];
-      // Optimistic update
-      setProtocol((prev) => ({ ...prev, [stepKey]: nextVal }));
+    const previousProtocol = protocol;
+    const previousStreak = streak;
+    const nextVal = !protocol[stepKey];
 
-      const res = await toggleProtocolStep(stepKey, nextVal);
-      if (res.success) {
-        setProtocol(res.protocol);
-        setStreak(res.streak);
-      }
-    } catch (err) {
-      console.error('Erreur toggle étape:', err);
-    } finally {
-      setIsUpdating(false);
+    // Haptic feedback on mobile if supported
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate?.([15]);
     }
+
+    // Compute optimistic state in 0 ms
+    const updated = { ...protocol, [stepKey]: nextVal };
+    const allDone = Boolean(
+      updated.pre_market_done &&
+      updated.session_rules_done &&
+      updated.journaling_done &&
+      updated.mental_close_done
+    );
+
+    setProtocol((prev) => ({
+      ...prev,
+      [stepKey]: nextVal,
+      is_completed: allDone,
+    }));
+
+    // Optimistically update streak counter if day becomes fully completed
+    if (allDone && !protocol.is_completed) {
+      setStreak((prev) => ({
+        ...prev,
+        current_streak: (prev.current_streak || 0) + 1,
+      }));
+    } else if (!allDone && protocol.is_completed) {
+      setStreak((prev) => ({
+        ...prev,
+        current_streak: Math.max(0, (prev.current_streak || 0) - 1),
+      }));
+    }
+
+    // Asynchronous background persistence (non-blocking for UI)
+    toggleProtocolStep(stepKey, nextVal)
+      .then((res) => {
+        if (res.success) {
+          setProtocol(res.protocol);
+          setStreak(res.streak);
+        }
+      })
+      .catch((err) => {
+        console.error('Erreur toggle étape:', err);
+        // Rollback gracefully on error
+        setProtocol(previousProtocol);
+        setStreak(previousStreak);
+      });
   };
 
   const handleToggleNoTrade = async () => {
-    try {
-      setIsUpdating(true);
-      const nextVal = !protocol.no_trade_day;
-      setProtocol((prev) => ({ ...prev, no_trade_day: nextVal, is_completed: nextVal }));
+    const previousProtocol = protocol;
+    const previousStreak = streak;
+    const nextVal = !protocol.no_trade_day;
 
-      const res = await toggleNoTradeDay(nextVal);
-      if (res.success) {
-        setProtocol(res.protocol);
-        setStreak(res.streak);
-      }
-    } catch (err) {
-      console.error('Erreur toggle no trade:', err);
-    } finally {
-      setIsUpdating(false);
+    if (typeof window !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate?.([15]);
     }
+
+    // 0ms Optimistic update
+    setProtocol((prev) => ({
+      ...prev,
+      no_trade_day: nextVal,
+      is_completed: nextVal,
+    }));
+
+    if (nextVal && !protocol.is_completed) {
+      setStreak((prev) => ({
+        ...prev,
+        current_streak: (prev.current_streak || 0) + 1,
+      }));
+    } else if (!nextVal && protocol.is_completed) {
+      setStreak((prev) => ({
+        ...prev,
+        current_streak: Math.max(0, (prev.current_streak || 0) - 1),
+      }));
+    }
+
+    toggleNoTradeDay(nextVal)
+      .then((res) => {
+        if (res.success) {
+          setProtocol(res.protocol);
+          setStreak(res.streak);
+        }
+      })
+      .catch((err) => {
+        console.error('Erreur toggle no trade:', err);
+        setProtocol(previousProtocol);
+        setStreak(previousStreak);
+      });
   };
 
   const todayFormatted = mounted

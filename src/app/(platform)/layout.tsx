@@ -2,6 +2,7 @@ import React from 'react';
 import { createClient } from '@/lib/supabase/server';
 import { Sidebar } from '@/components/layout/sidebar';
 import { Topbar } from '@/components/layout/topbar';
+import { PwaInstallBanner } from '@/components/pwa/pwa-install-banner';
 import type { Profile } from '@/types';
 
 export const dynamic = 'force-dynamic';
@@ -39,6 +40,9 @@ export default async function PlatformLayout({
           {children}
         </main>
       </div>
+
+      {/* Mobile PWA Installation helper */}
+      <PwaInstallBanner />
     </div>
   );
 }

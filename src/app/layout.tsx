@@ -18,6 +18,16 @@ export const metadata: Metadata = {
   title: "OPAL — The Trading Operating System",
   description:
     "OPAL centralise la formation, le journal de trading, les outils, la communauté et l'accompagnement pour les traders.",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "OPAL OS",
+  },
+  icons: {
+    icon: "/icons/icon-192.png",
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
@@ -27,6 +37,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${inter.variable} ${geistMono.variable} dark h-full antialiased`}
     >
       <head>
+        <meta name="theme-color" content="#0A0A0A" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/manifest.webmanifest" />
         {/* Whop Pixel (Business ID: biz_B69xbdKu6D1sMB) */}
         <script
           dangerouslySetInnerHTML={{

@@ -10,6 +10,8 @@ const publicRoutes = [
   "/",
   "/mentorat",
   "/checkout",
+  "/manifest.webmanifest",
+  "/manifest.json",
   "/.well-known/apple-developer-merchantid-domain-association",
 ];
 
@@ -123,6 +125,6 @@ export const config = {
      * - favicon.ico, sitemap.xml, robots.txt
      * - public assets (images, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|images/|\\.well-known).*)",
+    "/((?!_next/static|_next/image|favicon.ico|sitemap.xml|robots.txt|images/|icons/|manifest|apple-touch-icon|\\.well-known).*)",
   ],
 };
