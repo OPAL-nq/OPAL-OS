@@ -18,7 +18,7 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
-const DISCORD_COMMUNITY_URL = 'https://discord.gg/rz7QrkDpc';
+const DISCORD_COMMUNITY_URL = 'https://discord.gg/ZahC742M6';
 
 export default function CommunityPage() {
   const [copied, setCopied] = useState(false);
