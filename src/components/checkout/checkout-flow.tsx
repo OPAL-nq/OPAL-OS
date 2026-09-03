@@ -32,6 +32,7 @@ import {
   completeCheckoutRegistration,
 } from '@/app/actions/checkout';
 import { cn } from '@/lib/utils';
+import { trackInitiateCheckout } from '@/components/tracking/pixel-tracker';
 
 // Dynamically import WhopCheckoutEmbed for SSR compatibility
 const WhopCheckoutEmbed = dynamic(
@@ -512,6 +513,7 @@ export function CheckoutFlow() {
                       href={directWhopUrl}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => trackInitiateCheckout('Checkout Page - Direct Whop Button', 1998, 'EUR')}
                       className="w-full min-h-[3.5rem] py-3.5 px-4 rounded-xl font-black text-xs sm:text-sm bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_25px_rgba(57,255,20,0.35)] flex items-center justify-center gap-2.5 text-center transition-all group active:scale-95 leading-tight"
                     >
                       <CreditCard className="w-5 h-5 text-black shrink-0" />

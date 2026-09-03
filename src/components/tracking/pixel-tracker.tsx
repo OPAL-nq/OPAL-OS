@@ -50,19 +50,38 @@ export function trackPixelEvent(
 }
 
 /**
- * Helper to track InitiateCheckout specifically for the 1 998 € Mentorship offer
+ * Helper to track InitiateCheckout / AddToCart specifically for the 1 998 € Mentorship offer
  */
 export function trackInitiateCheckout(
   contentName: string = 'OPAL Intensive Mentorship',
   value: number = 1998,
   currency: string = 'EUR'
 ) {
+  // 1. Meta (Facebook/Instagram) & TikTok Pixel
   trackPixelEvent('InitiateCheckout', {
     content_name: contentName,
     content_category: 'Mentorship',
     value,
     currency,
   });
+
+  // 2. Whop Pixel: Fire standard event 'add_to_cart' & custom 'initiate_checkout'
+  if (typeof window !== 'undefined' && typeof window.whop === 'object' && typeof window.whop.track === 'function') {
+    try {
+      window.whop.track('add_to_cart', {
+        value,
+        currency,
+        content_name: contentName,
+      });
+      window.whop.track('initiate_checkout', {
+        value,
+        currency,
+        content_name: contentName,
+      });
+    } catch (err) {
+      console.warn('[PixelTracker] Whop track error:', err);
+    }
+  }
 }
 
 /**

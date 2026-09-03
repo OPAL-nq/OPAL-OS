@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ShieldAlert } from 'lucide-react';
+import { ShieldAlert, CheckCircle2, Lock } from 'lucide-react';
+import { trackInitiateCheckout } from '@/components/tracking/pixel-tracker';
 
 export function LandingFooter() {
   return (
@@ -63,7 +64,11 @@ export function LandingFooter() {
             © {new Date().getFullYear()} OPAL OS. Tous droits réservés.
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/checkout" className="text-[#39FF14] hover:underline">
+            <Link
+              href="/checkout"
+              onClick={() => trackInitiateCheckout('Footer Link - Accès Inscription Checkout', 1998, 'EUR')}
+              className="text-[#39FF14] hover:underline"
+            >
               Accès Inscription Checkout
             </Link>
             <span>•</span>
