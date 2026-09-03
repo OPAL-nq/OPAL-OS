@@ -43,24 +43,24 @@ export function PricingSection() {
         </div>
 
         {/* Big Master Offer Card */}
-        <div className="rounded-3xl bg-[#141414] border border-[#39FF14]/50 p-6 sm:p-10 relative overflow-hidden shadow-[0_0_50px_rgba(57,255,20,0.15)] bg-gradient-to-b from-[#141414] via-[#141414] to-[#122212]">
-          <div className="absolute top-0 right-0 bg-[#39FF14] text-black text-xs font-black uppercase tracking-wider px-5 py-1.5 rounded-bl-2xl shadow-lg">
+        <div className="rounded-3xl bg-[#141414] border border-[#39FF14]/50 p-5 sm:p-10 relative overflow-hidden shadow-[0_0_50px_rgba(57,255,20,0.15)] bg-gradient-to-b from-[#141414] via-[#141414] to-[#122212]">
+          <div className="absolute top-0 right-0 bg-[#39FF14] text-black text-[9px] sm:text-xs font-black uppercase tracking-wider px-3 sm:px-5 py-1 sm:py-1.5 rounded-bl-2xl shadow-lg">
             Mentorat 1-on-1 • Accès Complet
           </div>
 
-          <div className="space-y-8">
+          <div className="space-y-6 sm:space-y-8">
             {/* Price Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-white/10">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 pb-6 sm:pb-8 border-b border-white/10">
               <div className="space-y-2">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-10 h-10 rounded-xl bg-[#39FF14]/15 border border-[#39FF14]/30 flex items-center justify-center text-[#39FF14]">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-[#39FF14]/15 border border-[#39FF14]/30 flex items-center justify-center text-[#39FF14] shrink-0">
                     <Flame className="w-5 h-5 fill-current" />
                   </div>
                   <div>
-                    <h3 className="text-2xl sm:text-3xl font-black text-white">
+                    <h3 className="text-xl sm:text-3xl font-black text-white">
                       OPAL Intensive
                     </h3>
-                    <span className="text-xs text-[#39FF14] font-bold uppercase tracking-wider">
+                    <span className="text-[10px] sm:text-xs text-[#39FF14] font-bold uppercase tracking-wider">
                       Mentorat Privé 1-on-1 + Écosystème OS Complet
                     </span>
                   </div>
@@ -71,27 +71,27 @@ export function PricingSection() {
                 </p>
               </div>
 
-              <div className="shrink-0 text-left md:text-right space-y-1">
+              <div className="shrink-0 text-left md:text-right space-y-1 pt-2 md:pt-0">
                 <div className="flex items-baseline gap-2 md:justify-end">
-                  <span className="text-4xl sm:text-6xl font-black text-[#39FF14] tracking-tight">
+                  <span className="text-4xl xs:text-5xl sm:text-6xl font-black text-[#39FF14] tracking-tight">
                     1 998 €
                   </span>
                 </div>
-                <div className="text-xs font-semibold text-neutral-400">
+                <div className="text-[11px] sm:text-xs font-semibold text-neutral-400">
                   Paiement unique • Accès complet
                 </div>
               </div>
             </div>
 
             {/* Value Stack Breakdown */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 pt-1 sm:pt-2">
               {/* Pillar 1 bullets */}
-              <div className="space-y-3.5">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-[#39FF14]">
                   <Zap className="w-4 h-4" />
                   <span>Accompagnement 1-on-1 Privé</span>
                 </div>
-                <ul className="space-y-2.5 text-xs sm:text-sm text-neutral-200">
+                <ul className="space-y-2 text-xs sm:text-sm text-neutral-200">
                   {[
                     '2 sessions de coaching privé 1-on-1 par semaine avec Maxym (45-60 min)',
                     'Audit continu de vos sessions de trading et débriefing graphique',
@@ -103,19 +103,19 @@ export function PricingSection() {
                       <div className="w-4 h-4 rounded-full bg-[#39FF14]/20 text-[#39FF14] flex items-center justify-center shrink-0 mt-0.5">
                         <Check className="w-3 h-3 stroke-[3]" />
                       </div>
-                      <span className="font-medium">{item}</span>
+                      <span className="font-medium leading-relaxed">{item}</span>
                     </li>
                   ))}
                 </ul>
               </div>
 
               {/* Pillar 2 bullets */}
-              <div className="space-y-3.5">
+              <div className="space-y-3">
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-wider text-neutral-300">
                   <Sparkles className="w-4 h-4 text-[#39FF14]" />
                   <span>Suite Logicielle OPAL OS Incluse</span>
                 </div>
-                <ul className="space-y-2.5 text-xs sm:text-sm text-neutral-200">
+                <ul className="space-y-2 text-xs sm:text-sm text-neutral-200">
                   {[
                     'Dashboard Trading OS & gestionnaire de sessions NQ/ES',
                     'Journal de trading automatique & calcul instantané du PnL / Multiple R',
@@ -128,7 +128,7 @@ export function PricingSection() {
                       <div className="w-4 h-4 rounded-full bg-white/10 text-white flex items-center justify-center shrink-0 mt-0.5">
                         <Check className="w-3 h-3 text-[#39FF14] stroke-[3]" />
                       </div>
-                      <span className="font-medium">{item}</span>
+                      <span className="font-medium leading-relaxed">{item}</span>
                     </li>
                   ))}
                 </ul>
@@ -136,24 +136,25 @@ export function PricingSection() {
             </div>
 
             {/* Primary Action Button */}
-            <div className="pt-4 space-y-4">
+            <div className="pt-2 sm:pt-4 space-y-3 sm:space-y-4">
               <Link
                 href="/checkout"
                 onClick={handleCtaClick}
-                className="w-full py-5 px-6 rounded-2xl font-black text-base sm:text-lg bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_40px_rgba(57,255,20,0.45)] flex items-center justify-center gap-3 transition-all hover:scale-[1.01] active:scale-95 group text-center"
+                className="w-full min-h-[56px] py-4 sm:py-5 px-6 rounded-xl sm:rounded-2xl font-black text-sm sm:text-lg bg-[#39FF14] hover:bg-[#32e612] text-black shadow-[0_0_40px_rgba(57,255,20,0.45)] flex items-center justify-center gap-2.5 sm:gap-3 transition-all active:scale-95 group text-center"
               >
-                <CreditCard className="w-6 h-6 text-black shrink-0" />
-                <span>Réserver ma place au Mentorat — 1 998 €</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                <CreditCard className="w-5 h-5 sm:w-6 sm:h-6 text-black shrink-0" />
+                <span className="hidden sm:inline">Réserver ma place au Mentorat — 1 998 €</span>
+                <span className="sm:hidden">Réserver ma place (1 998 €)</span>
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform shrink-0" />
               </Link>
 
-              <p className="text-center text-xs text-neutral-400">
+              <p className="text-center text-[11px] sm:text-xs text-neutral-400">
                 Paiement sécurisé partenaire Whop (CB, Apple Pay, Google Pay). Accès immédiat au cockpit.
               </p>
             </div>
 
             {/* Trust Seals */}
-            <div className="pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="pt-4 border-t border-white/10 grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-3">
               <div className="p-3 rounded-xl bg-black/40 border border-white/5 flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 text-[#39FF14] shrink-0" />
                 <div className="text-[11px]">

@@ -269,12 +269,12 @@ export function CheckoutFlow() {
               </p>
             </div>
 
-            {/* 2-Column Grid Layout */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start max-w-6xl mx-auto">
+            {/* 2-Column Grid Layout (Terminal first on mobile for instant 1-click Apple Pay / Whop access) */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-start max-w-6xl mx-auto">
               {/* LEFT COLUMN: INTENSIVE VALUE STACK, PHASES & FAQ (7 COLS) */}
-              <div className="lg:col-span-7 space-y-6">
+              <div className="lg:col-span-7 space-y-6 order-2 lg:order-1">
                 {/* 1. Main Offer Card */}
-                <div className="rounded-2xl bg-[#141414] border border-[#39FF14]/40 p-6 sm:p-8 relative overflow-hidden shadow-[0_0_35px_rgba(57,255,20,0.12)] bg-gradient-to-b from-[#141414] via-[#141414] to-[#121c12]">
+                <div className="rounded-2xl bg-[#141414] border border-[#39FF14]/40 p-4 sm:p-8 relative overflow-hidden shadow-[0_0_35px_rgba(57,255,20,0.12)] bg-gradient-to-b from-[#141414] via-[#141414] to-[#121c12]">
                   <div className="absolute top-0 right-0 bg-[#39FF14] text-black text-[10px] font-black uppercase tracking-wider px-3.5 py-1 rounded-bl-xl shadow-lg">
                     Offre Exclusive
                   </div>
@@ -497,8 +497,8 @@ export function CheckoutFlow() {
               </div>
 
               {/* RIGHT COLUMN: DIRECT TERMINAL & FAST CHECKOUT (5 COLS) */}
-              <div className="lg:col-span-5 space-y-6">
-                <div className="bg-[#141414] border border-white/10 rounded-2xl p-6 sm:p-7 shadow-2xl space-y-6 sticky top-24">
+              <div className="lg:col-span-5 space-y-6 order-1 lg:order-2">
+                <div className="bg-[#141414] border border-white/10 rounded-2xl p-4 sm:p-7 shadow-2xl space-y-5 sm:space-y-6 sticky top-24">
                   <div className="flex items-center justify-between text-xs pb-4 border-b border-white/5">
                     <div className="flex items-center gap-2 text-white font-bold">
                       <Lock className="w-4 h-4 text-[#39FF14]" />

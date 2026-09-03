@@ -36,54 +36,58 @@ export function CockpitPreviewSection() {
           </p>
         </div>
 
-        {/* Tab Navigation */}
-        <div className="flex flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-[#141414] border border-white/10 max-w-2xl mx-auto">
+        {/* Tab Navigation (2x2 grid on mobile, flex on desktop) */}
+        <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center justify-center gap-2 p-1.5 rounded-2xl bg-[#141414] border border-white/10 max-w-2xl mx-auto w-full">
           <button
+            type="button"
             onClick={() => setActiveTab('intensive')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeTab === 'intensive'
                 ? 'bg-[#39FF14] text-black shadow-[0_0_20px_rgba(57,255,20,0.3)]'
-                : 'text-neutral-400 hover:text-white'
+                : 'text-neutral-400 hover:text-white bg-white/[0.02] sm:bg-transparent'
             }`}
           >
-            <Calendar className="w-4 h-4" />
-            <span>Cockpit Intensive 1-on-1</span>
+            <Calendar className="w-4 h-4 shrink-0" />
+            <span className="truncate">Cockpit 1-on-1</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('journal')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeTab === 'journal'
                 ? 'bg-[#39FF14] text-black shadow-[0_0_20px_rgba(57,255,20,0.3)]'
-                : 'text-neutral-400 hover:text-white'
+                : 'text-neutral-400 hover:text-white bg-white/[0.02] sm:bg-transparent'
             }`}
           >
-            <BarChart3 className="w-4 h-4" />
-            <span>Journal & Analytics</span>
+            <BarChart3 className="w-4 h-4 shrink-0" />
+            <span className="truncate">Journal & Métriques</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('academy')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeTab === 'academy'
                 ? 'bg-[#39FF14] text-black shadow-[0_0_20px_rgba(57,255,20,0.3)]'
-                : 'text-neutral-400 hover:text-white'
+                : 'text-neutral-400 hover:text-white bg-white/[0.02] sm:bg-transparent'
             }`}
           >
-            <BookOpen className="w-4 h-4" />
-            <span>Academy & Systèmes</span>
+            <BookOpen className="w-4 h-4 shrink-0" />
+            <span className="truncate">Academy & Setups</span>
           </button>
 
           <button
+            type="button"
             onClick={() => setActiveTab('live')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+            className={`px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5 sm:gap-2 ${
               activeTab === 'live'
                 ? 'bg-[#39FF14] text-black shadow-[0_0_20px_rgba(57,255,20,0.3)]'
-                : 'text-neutral-400 hover:text-white'
+                : 'text-neutral-400 hover:text-white bg-white/[0.02] sm:bg-transparent'
             }`}
           >
-            <Radio className="w-4 h-4" />
-            <span>Live Trading & Salons</span>
+            <Radio className="w-4 h-4 shrink-0" />
+            <span className="truncate">Live & Replays</span>
           </button>
         </div>
 
