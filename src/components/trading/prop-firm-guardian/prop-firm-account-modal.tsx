@@ -12,9 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, Shield, Sparkles, Loader2, Edit, AlertCircle } from 'lucide-react';
-import { PROP_FIRM_PRESETS } from '@/lib/prop-firm-constants';
+import { PROP_FIRM_PRESETS, POPULAR_PROP_FIRMS, getPropFirmLabel } from '@/lib/prop-firm-constants';
 import { createPropFirmAccount, updatePropFirmAccount } from '@/app/actions/prop-firm';
-import type { PropFirmAccount, PropFirmName, PropFirmPreset } from '@/types/prop-firm';
+import type { PropFirmAccount, PropFirmPreset } from '@/types/prop-firm';
 import { cn } from '@/lib/utils';
 
 interface PropFirmAccountModalProps {
@@ -22,6 +22,8 @@ interface PropFirmAccountModalProps {
   trigger?: React.ReactNode;
   onSuccess?: () => void;
 }
+
+const KNOWN_FIRM_KEYS = ['tradeify', 'mffu', 'topstep', 'apex', 'lucid', 'tradeday', 'bulenox'];
 
 export function PropFirmAccountModal({
   accountToEdit,
@@ -32,12 +34,25 @@ export function PropFirmAccountModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Preset Filter State
+  const [presetFilter, setPresetFilter] = useState<string>('all');
+
+  // Detect if existing account is custom or known
+  const existingIsCustom = accountToEdit
+    ? !KNOWN_FIRM_KEYS.includes(accountToEdit.firm_name.toLowerCase()) || accountToEdit.firm_name === 'custom'
+    : false;
+
   // Form State
   const [selectedPresetId, setSelectedPresetId] = useState<string>(
-    accountToEdit ? `${accountToEdit.firm_name}-${accountToEdit.account_tier}` : 'topstep-50k'
+    accountToEdit ? `${accountToEdit.firm_name}-${accountToEdit.account_tier}` : 'tradeify-50k-growth'
   );
-  const [accountName, setAccountName] = useState(accountToEdit?.account_name || 'Topstep 50k #1');
-  const [firmName, setFirmName] = useState<PropFirmName>(accountToEdit?.firm_name || 'topstep');
+  const [accountName, setAccountName] = useState(accountToEdit?.account_name || 'Tradeify 50k #1');
+  const [firmName, setFirmName] = useState<string>(
+    accountToEdit ? (existingIsCustom ? 'custom' : accountToEdit.firm_name.toLowerCase()) : 'tradeify'
+  );
+  const [customFirmName, setCustomFirmName] = useState<string>(
+    existingIsCustom && accountToEdit ? accountToEdit.firm_name : ''
+  );
   const [accountTier, setAccountTier] = useState(accountToEdit?.account_tier || '50k');
   const [startingBalance, setStartingBalance] = useState(accountToEdit?.starting_balance || 50000);
   const [currentBalance, setCurrentBalance] = useState(
@@ -48,21 +63,30 @@ export function PropFirmAccountModal({
   );
   const [drawdownLimit, setDrawdownLimit] = useState(accountToEdit?.drawdown_limit || 2000);
   const [maxDailyLoss, setMaxDailyLoss] = useState<string>(
-    accountToEdit?.max_daily_loss ? String(accountToEdit.max_daily_loss) : '1000'
+    accountToEdit?.max_daily_loss ? String(accountToEdit.max_daily_loss) : '1250'
   );
   const [profitTarget, setProfitTarget] = useState<string>(
     accountToEdit?.profit_target ? String(accountToEdit.profit_target) : '3000'
   );
   const [consistencyRulePct, setConsistencyRulePct] = useState<string>(
-    accountToEdit?.consistency_rule_pct ? String(accountToEdit.consistency_rule_pct) : '50'
+    accountToEdit?.consistency_rule_pct ? String(accountToEdit.consistency_rule_pct) : ''
   );
   const [isTrailingEod, setIsTrailingEod] = useState(accountToEdit?.is_trailing_eod ?? true);
   const [notes, setNotes] = useState(accountToEdit?.notes || '');
+
+  // Filtered Presets
+  const filteredPresets =
+    presetFilter === 'all'
+      ? PROP_FIRM_PRESETS
+      : PROP_FIRM_PRESETS.filter((p) => p.firmName === presetFilter);
 
   // Handle preset selection
   const handleSelectPreset = (preset: PropFirmPreset) => {
     setSelectedPresetId(preset.id);
     setFirmName(preset.firmName);
+    if (preset.firmName === 'custom') {
+      setCustomFirmName('');
+    }
     setAccountTier(preset.tierLabel);
     setStartingBalance(preset.startingBalance);
     setCurrentBalance(preset.startingBalance);
@@ -73,7 +97,8 @@ export function PropFirmAccountModal({
     setConsistencyRulePct(preset.consistencyRulePct ? String(preset.consistencyRulePct) : '');
     setIsTrailingEod(preset.isTrailingEod);
     if (!accountToEdit) {
-      setAccountName(`${preset.firmLabel} ${preset.tierLabel.split(' ')[0]}`);
+      const tierShort = preset.tierLabel.split(' ')[0];
+      setAccountName(`${preset.firmLabel} ${tierShort} #1`);
     }
   };
 
@@ -84,14 +109,22 @@ export function PropFirmAccountModal({
       return;
     }
 
+    if (firmName === 'custom' && !customFirmName.trim()) {
+      setError('Veuillez indiquer le nom de votre Prop Firm personnalisée.');
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
+
+    const resolvedFirmName =
+      firmName === 'custom' && customFirmName.trim() ? customFirmName.trim() : firmName;
 
     try {
       if (accountToEdit) {
         await updatePropFirmAccount(accountToEdit.id, {
           accountName,
-          firmName,
+          firmName: resolvedFirmName,
           accountTier,
           startingBalance: Number(startingBalance),
           currentBalance: Number(currentBalance),
@@ -106,7 +139,7 @@ export function PropFirmAccountModal({
       } else {
         await createPropFirmAccount({
           accountName,
-          firmName,
+          firmName: resolvedFirmName,
           accountTier,
           startingBalance: Number(startingBalance),
           currentBalance: Number(currentBalance),
@@ -161,13 +194,52 @@ export function PropFirmAccountModal({
 
           {/* Quick Presets Selector */}
           {!accountToEdit && (
-            <div className="space-y-2">
-              <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#39FF14]" />
-                <span>1. Choisir un Template Prop Firm préconfiguré</span>
-              </label>
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-neutral-300 uppercase tracking-wider flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#39FF14]" />
+                  <span>1. Choisir un Template Prop Firm préconfiguré</span>
+                </label>
+              </div>
+
+              {/* Firm Category Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-none">
+                <button
+                  type="button"
+                  onClick={() => setPresetFilter('all')}
+                  className={cn(
+                    'px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all border shrink-0',
+                    presetFilter === 'all'
+                      ? 'bg-[#39FF14] text-black border-[#39FF14]'
+                      : 'bg-white/5 text-neutral-400 border-white/10 hover:text-white hover:border-white/20'
+                  )}
+                >
+                  Toutes ({PROP_FIRM_PRESETS.length})
+                </button>
+                {POPULAR_PROP_FIRMS.map((firm) => {
+                  const count = PROP_FIRM_PRESETS.filter((p) => p.firmName === firm.key).length;
+                  const isSelected = presetFilter === firm.key;
+                  return (
+                    <button
+                      key={firm.key}
+                      type="button"
+                      onClick={() => setPresetFilter(firm.key)}
+                      className={cn(
+                        'px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all border shrink-0',
+                        isSelected
+                          ? 'bg-[#39FF14] text-black border-[#39FF14]'
+                          : 'bg-white/5 text-neutral-400 border-white/10 hover:text-white hover:border-white/20'
+                      )}
+                    >
+                      {firm.label.split(' ')[0]} {count > 0 && `(${count})`}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Presets Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
-                {PROP_FIRM_PRESETS.map((preset) => {
+                {filteredPresets.map((preset) => {
                   const isSelected = selectedPresetId === preset.id;
                   return (
                     <button
@@ -175,7 +247,7 @@ export function PropFirmAccountModal({
                       type="button"
                       onClick={() => handleSelectPreset(preset)}
                       className={cn(
-                        'p-2.5 rounded-lg border text-left transition-all text-xs flex flex-col justify-between',
+                        'p-2.5 rounded-lg border text-left transition-all text-xs flex flex-col justify-between gap-1',
                         isSelected
                           ? 'bg-[#39FF14]/15 border-[#39FF14] text-white shadow-[0_0_10px_rgba(57,255,20,0.15)]'
                           : 'bg-[#0A0A0A] border-white/10 text-neutral-400 hover:border-white/25 hover:text-neutral-200'
@@ -183,13 +255,18 @@ export function PropFirmAccountModal({
                     >
                       <div>
                         <div className="font-bold text-white flex items-center justify-between">
-                          <span>{preset.firmLabel}</span>
-                          <span className="text-[10px] text-[#39FF14]">{preset.tierLabel.split(' ')[0]}</span>
+                          <span className="truncate">{preset.firmLabel}</span>
+                          <span className="text-[10px] text-[#39FF14] font-mono shrink-0 ml-1">
+                            {preset.tierLabel.split(' ')[0]}
+                          </span>
                         </div>
-                        <p className="text-[10px] text-neutral-500 line-clamp-1 mt-0.5">
-                          {preset.isTrailingEod ? 'Trailing EOD' : 'Trailing Intraday'}
+                        <p className="text-[10px] text-neutral-400 truncate mt-0.5">
+                          {preset.tierLabel}
                         </p>
                       </div>
+                      <p className="text-[9px] text-neutral-500 font-mono">
+                        {preset.isTrailingEod ? 'Trailing EOD' : 'Trailing Intraday'} • DD ${preset.drawdownLimit}
+                      </p>
                     </button>
                   );
                 })}
@@ -207,7 +284,7 @@ export function PropFirmAccountModal({
                 <Input
                   value={accountName}
                   onChange={(e) => setAccountName(e.target.value)}
-                  placeholder="ex: Topstep 50k #1, Apex PA 150k"
+                  placeholder="ex: Tradeify 50k #1, Topstep Combine #2..."
                   className="bg-[#0A0A0A] border-white/10 text-white text-xs h-9"
                   required
                 />
@@ -219,17 +296,42 @@ export function PropFirmAccountModal({
                 </label>
                 <select
                   value={firmName}
-                  onChange={(e) => setFirmName(e.target.value as PropFirmName)}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setFirmName(val);
+                    if (val !== 'custom') {
+                      setCustomFirmName('');
+                    }
+                  }}
                   className="w-full bg-[#0A0A0A] border border-white/10 rounded-md text-white text-xs h-9 px-3 focus:border-[#39FF14]/50 focus:outline-none"
                 >
-                  <option value="topstep">Topstep</option>
-                  <option value="apex">Apex Trader Funding</option>
-                  <option value="mffu">MyFundedFutures (MFFU)</option>
-                  <option value="tradeday">TradeDay</option>
-                  <option value="bulenox">Bulenox</option>
-                  <option value="custom">Compte Personnel / Sur Mesure</option>
+                  {POPULAR_PROP_FIRMS.map((firm) => (
+                    <option key={firm.key} value={firm.key}>
+                      {firm.label}
+                    </option>
+                  ))}
                 </select>
               </div>
+
+              {/* Custom Prop Firm Name Field */}
+              {firmName === 'custom' && (
+                <div className="space-y-1.5 sm:col-span-2">
+                  <label className="text-xs font-semibold text-neutral-300 flex items-center justify-between">
+                    <span>Nom de votre Prop Firm personnalisée</span>
+                    <span className="text-[10px] text-[#39FF14] font-bold">Sur Mesure</span>
+                  </label>
+                  <Input
+                    value={customFirmName}
+                    onChange={(e) => setCustomFirmName(e.target.value)}
+                    placeholder="ex: Take Profit Trader, Fast Track Trading, Funding Pips, Alpha Capital..."
+                    className="bg-[#0A0A0A] border-[#39FF14]/40 text-white text-xs h-9 focus:border-[#39FF14]"
+                    required
+                  />
+                  <p className="text-[10px] text-neutral-400">
+                    Saisissez le nom exact de la prop firm : elle sera enregistrée et affichée sur votre tableau de bord.
+                  </p>
+                </div>
+              )}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

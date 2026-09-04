@@ -26,6 +26,7 @@ import { deletePropFirmAccount } from '@/app/actions/prop-firm';
 import {
   calculateGuardianMetrics,
   calculateSizingComparison,
+  getPropFirmLabel,
 } from '@/lib/prop-firm-constants';
 import { INSTRUMENTS } from '@/lib/trading-constants';
 import { cn } from '@/lib/utils';
@@ -107,7 +108,7 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
               Prop Firm Drawdown Guardian
             </h2>
             <p className="text-xs sm:text-sm text-neutral-400 leading-relaxed">
-              Sécurisez vos évaluations et comptes financés (Topstep, Apex, MFFU, Bulenox, TradeDay).
+              Sécurisez vos évaluations et comptes financés (Tradeify, MyFundedFutures, Topstep, Apex, Lucid Trading, Bulenox, ou sur mesure).
               Calculez au tick près votre buffer de liquidation, le nombre de Stop Loss tolérables et la taille exacte de position (Micro vs Mini).
             </p>
           </div>
@@ -141,7 +142,7 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
                 type="button"
                 onClick={() => setSelectedAccountId(acc.id)}
                 className={cn(
-                  'flex items-center gap-2.5 px-3.5 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap border shrink-0',
+                  'flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all whitespace-nowrap border shrink-0',
                   isSelected
                     ? 'bg-[#39FF14]/15 text-white border-[#39FF14] shadow-[0_0_15px_rgba(57,255,20,0.2)]'
                     : 'bg-black/40 text-neutral-400 border-white/5 hover:border-white/20 hover:text-white'
@@ -152,6 +153,9 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
                   style={{ backgroundColor: accMetrics.zoneColor }}
                 />
                 <span className="font-semibold">{acc.account_name}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-neutral-300 font-medium">
+                  {getPropFirmLabel(acc.firm_name)}
+                </span>
                 <span className="text-[10px] text-neutral-400 font-mono">
                   ${Number(acc.current_balance).toLocaleString('en-US')}
                 </span>
@@ -205,10 +209,13 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
                     <Shield className="w-5 h-5" />
                   </div>
                   <div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <h2 className="text-lg font-black text-white">
                         {selectedAccount.account_name}
                       </h2>
+                      <span className="px-2 py-0.5 rounded bg-white/10 border border-white/10 text-[11px] font-bold text-[#39FF14]">
+                        {getPropFirmLabel(selectedAccount.firm_name)}
+                      </span>
                       <span
                         className="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider border"
                         style={{
@@ -221,6 +228,7 @@ export function PropFirmGuardianView({ accounts }: PropFirmGuardianViewProps) {
                       </span>
                     </div>
                     <p className="text-xs text-neutral-400 mt-0.5">
+                      Palier {selectedAccount.account_tier} •{' '}
                       {selectedAccount.is_trailing_eod
                         ? 'Trailing End-of-Day (EOD)'
                         : 'Trailing Intraday Live'}{' '}

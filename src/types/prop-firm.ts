@@ -1,4 +1,13 @@
-export type PropFirmName = 'topstep' | 'apex' | 'mffu' | 'bulenox' | 'tradeday' | 'custom';
+export type PropFirmName =
+  | 'tradeify'
+  | 'lucid'
+  | 'topstep'
+  | 'apex'
+  | 'mffu'
+  | 'tradeday'
+  | 'bulenox'
+  | 'custom'
+  | (string & {});
 
 export type PropFirmAccountStatus = 'active' | 'passed' | 'blown' | 'payout_ready';
 

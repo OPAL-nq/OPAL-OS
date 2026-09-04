@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Shield, ArrowRight, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { calculateGuardianMetrics } from '@/lib/prop-firm-constants';
+import { calculateGuardianMetrics, getPropFirmLabel } from '@/lib/prop-firm-constants';
 import type { PropFirmAccount } from '@/types/prop-firm';
 import { cn } from '@/lib/utils';
 
@@ -76,9 +76,12 @@ export function PropFirmSummaryWidget({ accounts }: PropFirmSummaryWidgetProps) 
           </div>
 
           <div className="min-w-0">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="text-xs font-bold text-white truncate">
                 {activeAccount.account_name}
+              </span>
+              <span className="text-[10px] px-1.5 py-0.2 rounded bg-white/10 text-[#39FF14] font-semibold border border-white/5">
+                {getPropFirmLabel(activeAccount.firm_name)}
               </span>
               <span
                 className="px-2 py-0.2 rounded-full text-[9px] font-black uppercase tracking-wider border"

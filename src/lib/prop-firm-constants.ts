@@ -126,6 +126,130 @@ export const PROP_FIRM_PRESETS: PropFirmPreset[] = [
     description: 'Trailing Intraday Live • Max Loss 7 500 $ • Pas de Daily Loss • Target 20 000 $',
   },
 
+  // TRADEIFY
+  {
+    id: 'tradeify-50k-growth',
+    firmName: 'tradeify',
+    firmLabel: 'Tradeify',
+    tierLabel: '50k Growth (EOD)',
+    startingBalance: 50000,
+    drawdownLimit: 2000,
+    maxDailyLoss: 1250,
+    profitTarget: 3000,
+    consistencyRulePct: undefined,
+    isTrailingEod: true,
+    maxContractsMini: 4,
+    maxContractsMicro: 40,
+    description: 'Trailing EOD • Max Loss 2 000 $ • Daily Loss 1 250 $ • Target 3 000 $',
+  },
+  {
+    id: 'tradeify-50k-select',
+    firmName: 'tradeify',
+    firmLabel: 'Tradeify',
+    tierLabel: '50k Select (No Daily Loss)',
+    startingBalance: 50000,
+    drawdownLimit: 2000,
+    maxDailyLoss: undefined,
+    profitTarget: 3000,
+    consistencyRulePct: 40,
+    isTrailingEod: true,
+    maxContractsMini: 4,
+    maxContractsMicro: 40,
+    description: 'Trailing EOD • Max Loss 2 000 $ • Pas de Daily Loss • Target 3 000 $ • Règle 40%',
+  },
+  {
+    id: 'tradeify-100k-growth',
+    firmName: 'tradeify',
+    firmLabel: 'Tradeify',
+    tierLabel: '100k Growth (EOD)',
+    startingBalance: 100000,
+    drawdownLimit: 3500,
+    maxDailyLoss: 2500,
+    profitTarget: 6000,
+    consistencyRulePct: undefined,
+    isTrailingEod: true,
+    maxContractsMini: 8,
+    maxContractsMicro: 80,
+    description: 'Trailing EOD • Max Loss 3 500 $ • Daily Loss 2 500 $ • Target 6 000 $',
+  },
+  {
+    id: 'tradeify-150k-growth',
+    firmName: 'tradeify',
+    firmLabel: 'Tradeify',
+    tierLabel: '150k Growth (EOD)',
+    startingBalance: 150000,
+    drawdownLimit: 5000,
+    maxDailyLoss: 3750,
+    profitTarget: 9000,
+    consistencyRulePct: undefined,
+    isTrailingEod: true,
+    maxContractsMini: 12,
+    maxContractsMicro: 120,
+    description: 'Trailing EOD • Max Loss 5 000 $ • Daily Loss 3 750 $ • Target 9 000 $',
+  },
+
+  // LUCID TRADING
+  {
+    id: 'lucid-50k-flex',
+    firmName: 'lucid',
+    firmLabel: 'Lucid Trading',
+    tierLabel: '50k LucidFlex (No Daily Loss)',
+    startingBalance: 50000,
+    drawdownLimit: 2000,
+    maxDailyLoss: undefined,
+    profitTarget: 3000,
+    consistencyRulePct: undefined,
+    isTrailingEod: true,
+    maxContractsMini: 5,
+    maxContractsMicro: 50,
+    description: 'Trailing EOD • Max Loss 2 000 $ • Pas de Daily Loss • Target 3 000 $',
+  },
+  {
+    id: 'lucid-50k-pro',
+    firmName: 'lucid',
+    firmLabel: 'Lucid Trading',
+    tierLabel: '50k LucidPro (Daily Loss)',
+    startingBalance: 50000,
+    drawdownLimit: 2000,
+    maxDailyLoss: 1250,
+    profitTarget: 3000,
+    consistencyRulePct: undefined,
+    isTrailingEod: true,
+    maxContractsMini: 5,
+    maxContractsMicro: 50,
+    description: 'Trailing EOD • Max Loss 2 000 $ • Daily Loss 1 250 $ • Target 3 000 $',
+  },
+  {
+    id: 'lucid-100k-flex',
+    firmName: 'lucid',
+    firmLabel: 'Lucid Trading',
+    tierLabel: '100k LucidFlex',
+    startingBalance: 100000,
+    drawdownLimit: 3500,
+    maxDailyLoss: undefined,
+    profitTarget: 6000,
+    consistencyRulePct: undefined,
+    isTrailingEod: true,
+    maxContractsMini: 10,
+    maxContractsMicro: 100,
+    description: 'Trailing EOD • Max Loss 3 500 $ • Pas de Daily Loss • Target 6 000 $',
+  },
+  {
+    id: 'lucid-100k-pro',
+    firmName: 'lucid',
+    firmLabel: 'Lucid Trading',
+    tierLabel: '100k LucidPro',
+    startingBalance: 100000,
+    drawdownLimit: 3500,
+    maxDailyLoss: 2500,
+    profitTarget: 6000,
+    consistencyRulePct: undefined,
+    isTrailingEod: true,
+    maxContractsMini: 10,
+    maxContractsMicro: 100,
+    description: 'Trailing EOD • Max Loss 3 500 $ • Daily Loss 2 500 $ • Target 6 000 $',
+  },
+
   // MYFUNDEDFUTURES (MFFU)
   {
     id: 'mffu-50k-starter',
@@ -171,6 +295,36 @@ export const PROP_FIRM_PRESETS: PropFirmPreset[] = [
     maxContractsMini: 10,
     maxContractsMicro: 100,
     description: 'Trailing EOD • Max Loss 3 000 $ • Daily Loss 2 200 $ • Target 6 000 $',
+  },
+  {
+    id: 'mffu-100k-expert',
+    firmName: 'mffu',
+    firmLabel: 'MyFundedFutures',
+    tierLabel: '100k Expert (No Daily Loss)',
+    startingBalance: 100000,
+    drawdownLimit: 3000,
+    maxDailyLoss: undefined,
+    profitTarget: 6000,
+    consistencyRulePct: 40,
+    isTrailingEod: true,
+    maxContractsMini: 10,
+    maxContractsMicro: 100,
+    description: 'Trailing EOD • Max Loss 3 000 $ • Pas de Daily Loss • Target 6 000 $',
+  },
+  {
+    id: 'mffu-150k-starter',
+    firmName: 'mffu',
+    firmLabel: 'MyFundedFutures',
+    tierLabel: '150k Starter (EOD)',
+    startingBalance: 150000,
+    drawdownLimit: 4500,
+    maxDailyLoss: 3000,
+    profitTarget: 9000,
+    consistencyRulePct: 40,
+    isTrailingEod: true,
+    maxContractsMini: 15,
+    maxContractsMicro: 150,
+    description: 'Trailing EOD • Max Loss 4 500 $ • Daily Loss 3 000 $ • Target 9 000 $',
   },
 
   // TRADEDAY
@@ -222,12 +376,12 @@ export const PROP_FIRM_PRESETS: PropFirmPreset[] = [
     description: 'Trailing Intraday • Max Loss 2 500 $ • Pas de Daily Loss • Target 3 000 $',
   },
 
-  // CUSTOM
+  // CUSTOM / AUTRE
   {
     id: 'custom-account',
     firmName: 'custom',
-    firmLabel: 'Personnalisé',
-    tierLabel: 'Compte Propre / Sur Mesure',
+    firmLabel: 'Autre Prop Firm',
+    tierLabel: 'Sur Mesure / Personnalisé',
     startingBalance: 50000,
     drawdownLimit: 2000,
     maxDailyLoss: 1000,
@@ -236,9 +390,52 @@ export const PROP_FIRM_PRESETS: PropFirmPreset[] = [
     isTrailingEod: true,
     maxContractsMini: 5,
     maxContractsMicro: 50,
-    description: 'Paramètres personnalisables selon votre propre politique de gestion du risque.',
+    description: 'Paramètres personnalisables selon la prop firm de votre choix (ex: Take Profit Trader, Fast Track...)',
   },
 ];
+
+export interface PropFirmOption {
+  key: string;
+  label: string;
+}
+
+export const POPULAR_PROP_FIRMS: PropFirmOption[] = [
+  { key: 'tradeify', label: 'Tradeify' },
+  { key: 'mffu', label: 'MyFundedFutures (MFFU)' },
+  { key: 'topstep', label: 'Topstep' },
+  { key: 'apex', label: 'Apex Trader Funding' },
+  { key: 'lucid', label: 'Lucid Trading' },
+  { key: 'tradeday', label: 'TradeDay' },
+  { key: 'bulenox', label: 'Bulenox' },
+  { key: 'custom', label: 'Autre Prop Firm (Sur Mesure)' },
+];
+
+export function getPropFirmLabel(firmName: string): string {
+  if (!firmName) return 'Prop Firm';
+  const clean = firmName.toLowerCase().trim();
+  switch (clean) {
+    case 'tradeify':
+      return 'Tradeify';
+    case 'mffu':
+    case 'myfundedfutures':
+      return 'MyFundedFutures';
+    case 'topstep':
+      return 'Topstep';
+    case 'apex':
+      return 'Apex Trader Funding';
+    case 'lucid':
+    case 'lucidtrading':
+      return 'Lucid Trading';
+    case 'tradeday':
+      return 'TradeDay';
+    case 'bulenox':
+      return 'Bulenox';
+    case 'custom':
+      return 'Sur Mesure';
+    default:
+      return firmName;
+  }
+}
 
 export const COMMISSIONS = {
   MINI_ROUNDTRIP: 2.5, // $ par contrat aller-retour
